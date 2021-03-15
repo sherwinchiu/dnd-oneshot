@@ -1,0 +1,35 @@
+html, body {
+    margin:0;
+    padding:0;
+}
+#main-screen{
+    border: solid black;
+    margin: none;
+    padding:  none;
+    display: inline-block;
+    width: 85%;
+    height: 90vh;
+    position: relative;
+}
+#tool-bar{
+    border: solid black;
+    margin: none;
+    margin-top: -5px;
+    margin-bottom: -10px;
+    padding:  none;
+    display: inline-block;
+    width: 85%;
+    height: 8.8vh;
+}
+#side-screen{
+    border: solid black;
+    margin: none;
+    margin-bottom: -10px;
+    z-index: 999;
+    padding:  none;
+    display: block;
+    float: right;
+    width: 13.5%;
+    height: 99.35vh;
+    
+}
