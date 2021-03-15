@@ -2,14 +2,22 @@ html, body {
     margin:0;
     padding:0;
 }
+.player{
+    border:solid;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    width: 99%;
+    height: 10vh;
+}
 #main-screen{
     border: solid black;
     margin: none;
     padding:  none;
-    display: inline-block;
     width: 85%;
     height: 90vh;
-    position: relative;
+    display: block;
+    float: left;
 }
 #tool-bar{
     border: solid black;
@@ -17,19 +25,39 @@ html, body {
     margin-top: -5px;
     margin-bottom: -10px;
     padding:  none;
-    display: inline-block;
     width: 85%;
-    height: 8.8vh;
+    height: 9vh;
+    display: block;
+    float: left;
+    border-right-width: 30px
 }
 #side-screen{
     border: solid black;
     margin: none;
-    margin-bottom: -10px;
-    z-index: 999;
     padding:  none;
-    display: block;
+    margin-left: -3px;
+    width: 13%;
+    height: 99.35vh;   
     float: right;
-    width: 13.5%;
-    height: 99.35vh;
-    
+    display: block;
+}
+#countdown-bar{
+    background-color: red;
+    width: 1.5%;
+    border-top-style: solid;
+    border-top-color: white; /*Going to use border-top-width and height to make a moving bar*/
+    border-top-width: 0px;
+    height: 910px;
+    margin: none;
+    padding:  none;
+    float: left;
+    display:block; 
+}
+#pfp{
+    border:solid;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    width: 99%;
+    height: 37.5vh;
 }
