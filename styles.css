@@ -8,7 +8,7 @@ html, body {
     border-right: none;
     border-top: none;
     width: 99%;
-    height: 10vh;
+    height: 8vh;
 }
 #main-screen{
     border: solid black;
@@ -18,6 +18,8 @@ html, body {
     height: 90vh;
     display: block;
     float: left;
+    background: url("maps/unnamed (2).jpg");
+    overflow:visible;
 }
 #tool-bar{
     border: solid black;
@@ -25,29 +27,29 @@ html, body {
     margin-top: -5px;
     margin-bottom: -10px;
     padding:  none;
-    width: 85%;
+    width: 85.2%;
     height: 9vh;
     display: block;
     float: left;
-    border-right-width: 30px
 }
 #side-screen{
     border: solid black;
     margin: none;
     padding:  none;
     margin-left: -3px;
-    width: 13%;
-    height: 99.35vh;   
-    float: right;
-    display: block;
+    border-bottom: none;
+    width: 12.3%;
+    height: 90.6vh;   
+    display: inline-block;
 }
 #countdown-bar{
     background-color: red;
     width: 1.5%;
+    border: solid black;
     border-top-style: solid;
     border-top-color: white; /*Going to use border-top-width and height to make a moving bar*/
     border-top-width: 0px;
-    height: 910px;
+    height: 90.6vh;
     margin: none;
     padding:  none;
     float: left;
@@ -59,5 +61,14 @@ html, body {
     border-right: none;
     border-top: none;
     width: 99%;
-    height: 37.5vh;
+    height: 40.5vh;
+}
+#spacer{
+    display: block;
+    float: left;
+    width: 14.1%;
+    height: 9vh;
+    background-color: black;
+    padding: none;
+    margin: none;
 }
