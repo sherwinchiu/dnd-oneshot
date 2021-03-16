@@ -7,11 +7,13 @@
         <title>Sherwin's World</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="./styles.css">
+        <link rel="stylesheet" type="text/css" href="./styles.css">
     </head>
     <body>
         <div id="main-screen">
+            <img src="move.png"/>
             <img id="map" src="/maps/unnamed (2).jpg"/>
+            
         </div>
         <div id="countdown-bar"></div>
         <div id="side-screen">
@@ -24,9 +26,9 @@
             <div class="player">Sasha</div>
         </div>
         <div id="tool-bar">
-            <div class="option" id="move">Move</div>
-            <div class="option" id="zoom-in">Zoom In</div>
-            <div class="option" id="zoom-out">Zoom Out</div>
+            <div class="option" id="move"><img class="tool-pic" src="move.png"/></div>
+            <div class="option" id="zoom-in"><img class="tool-pic" src="zoomIn.png"/></div>
+            <div class="option" id="zoom-out"><img class="tool-pic" src="zoomOut.png"/></div>
             <div class="option">Line</div>
             <div class="option">Circle</div>
             <div class="option">Square</div>
@@ -35,6 +37,7 @@
         </div>
         <div id="spacer"></div>
         <script src="./jquery-3.6.0.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
         <script src="./script.js"></script>
     </body>
 </html>

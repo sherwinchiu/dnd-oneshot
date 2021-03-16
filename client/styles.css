@@ -26,6 +26,14 @@ html, body {
     transition: 0.5s;
     cursor: pointer;
 }
+.tool-pic{
+    margin-top: 5%;
+    margin-left: 25%;
+    text-align: center;
+}
+.piece{
+    
+}
 #ping{
 
 }
@@ -53,6 +61,7 @@ html, body {
     display: block;
     float: left;
 }
+
 #side-screen{
     border: solid black;
     margin: none;

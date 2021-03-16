@@ -1,0 +1,22 @@
+{
+  "name": "dnd-oneshot",
+  "version": "1.0.0",
+  "description": "dnd oneshot interface and server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sherwinchiu/dnd-oneshot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sherwinchiu/dnd-oneshot/issues"
+  },
+  "homepage": "https://github.com/sherwinchiu/dnd-oneshot#readme",
+  "dependencies": {
+    "socket.io": "^4.0.0"
+  }
+}
