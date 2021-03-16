@@ -9,6 +9,7 @@ html, body {
     border-top: none;
     width: 99%;
     height: 8.95vh;
+    user-select: none
 }
 .option{
     display: block;
@@ -18,12 +19,12 @@ html, body {
     height: 8.5vh;
     margin: none;
     padding: none;
+    user-select: none;
 }
 .option:hover{
     background-color: gray;
-}
-#tools{
-    width: 40%;
+    transition: 0.5s;
+    cursor: pointer;
 }
 #ping{
 
@@ -37,6 +38,9 @@ html, body {
     display: block;
     float: left;
     overflow: hidden;
+}
+#map{
+    transform: scale(1.5);
 }
 #tool-bar{
     border: solid black;
@@ -84,7 +88,7 @@ html, body {
     display: block;
     float: left;
     width: 14.1%;
-    height: 9vh;
+    height: 9.05vh;
     background-color: black;
     padding: none;
     margin: none;

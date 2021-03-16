@@ -1,26 +1,33 @@
 // Scroll Variables
 var clicking = false;
+$("#move").css("background-color", "grey");
+var scale = 1.5;
 var move = true;
-var zoomIn = false;
-var zoomOut = false;
+var ping = false;
 var previousX;
 var previousY;
 // Onclick listeners for the buttons
 $("#move").click(function(){
-    move = true;
-    zoomIn = false;
-    zommOut = false;
+    if(!move){
+        $("#move").css("background-color", "grey");
+        move = true;
+    } else{
+        $("#move").css("background-color", "white");
+        move = false;
+    }
 });
 $("#zoom-in").click(function(){
-    move = false;
-    zoomIn = true;
-    zommOut = false;
+    scale+=0.1;
+    $("#map").css("transform", "scale("+scale+")");
 });
 $("#zoom-out").click(function(){
-    move = false;
-    zoomIn = false;
-    zommOut = true;
+    scale-=0.1;
+    if(scale<1){
+        scale =1;
+    }
+    $("#map").css("transform", "scale("+scale+")");
 });
+function modifyOptions(){}
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {
     e.preventDefault(); // mouse event
