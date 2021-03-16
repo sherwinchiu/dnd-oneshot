@@ -6,7 +6,29 @@ var move = true;
 var ping = false;
 var previousX;
 var previousY;
+var d = new Date();
+var n = d.getTime();
+var timerBar = 0;
+var timerHeight = 90.6;
+
 // Onclick listeners for the buttons
+$("#countdown-bar").click(function(){
+    var timerInterval = window.setInterval(timer, 10);
+});
+    
+function timer(){
+    var d = new Date();
+    if(d.getTime()-n  > 65 && timerBar <90.5){
+        timerBar+=0.1;
+        n = d.getTime();
+        $("#countdown-bar").css("border-top-width", timerBar+"vh");
+        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
+    }
+    if( timerBar< 90.5){
+        timerInterval = 0;
+    }
+    
+}
 $("#move").click(function(){
     if(!move){
         $("#move").css("background-color", "grey");
@@ -27,7 +49,6 @@ $("#zoom-out").click(function(){
     }
     $("#map").css("transform", "scale("+scale+")");
 });
-function modifyOptions(){}
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {
     e.preventDefault(); // mouse event

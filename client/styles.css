@@ -64,7 +64,7 @@ html, body {
     display: inline-block;
 }
 #countdown-bar{
-    background-color: red;
+    background-color: rgb(0, 255, 0);
     width: 1.5%;
     border: solid black;
     border-top-style: solid;
