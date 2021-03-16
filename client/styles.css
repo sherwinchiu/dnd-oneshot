@@ -8,7 +8,25 @@ html, body {
     border-right: none;
     border-top: none;
     width: 99%;
-    height: 8vh;
+    height: 8.95vh;
+}
+.option{
+    display: block;
+    float: left;
+    border: solid black;
+    width: 10%;
+    height: 8.5vh;
+    margin: none;
+    padding: none;
+}
+.option:hover{
+    background-color: gray;
+}
+#tools{
+    width: 40%;
+}
+#ping{
+
 }
 #main-screen{
     border: solid black;
@@ -18,8 +36,7 @@ html, body {
     height: 90vh;
     display: block;
     float: left;
-    background: url("maps/unnamed (2).jpg");
-    overflow:visible;
+    overflow: hidden;
 }
 #tool-bar{
     border: solid black;
@@ -61,7 +78,7 @@ html, body {
     border-right: none;
     border-top: none;
     width: 99%;
-    height: 40.5vh;
+    height: 35vh;
 }
 #spacer{
     display: block;
