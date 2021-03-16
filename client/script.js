@@ -1,7 +1,7 @@
 // Scroll Variables
 var clicking = false;
 $("#move").css("background-color", "grey");
-var scale = 1.5;
+var zoom = 200;
 var move = true;
 var ping = false;
 var previousX;
@@ -39,15 +39,18 @@ $("#move").click(function(){
     }
 });
 $("#zoom-in").click(function(){
-    scale+=0.1;
-    $("#map").css("transform", "scale("+scale+")");
+    zoom+=15;
+    if(zoom>300){
+        zoom= 300;
+    }
+    $("#map").css("zoom", zoom+"%");
 });
 $("#zoom-out").click(function(){
-    scale-=0.1;
-    if(scale<1){
-        scale =1;
+    zoom-=15;
+    if(zoom<100){
+        zoom =100;
     }
-    $("#map").css("transform", "scale("+scale+")");
+    $("#map").css("zoom", zoom+"%");
 });
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {

@@ -30,6 +30,8 @@ html, body {
     margin-top: 5%;
     margin-left: 25%;
     text-align: center;
+    width:auto;
+    height:90%;
 }
 .piece{
     
@@ -48,7 +50,7 @@ html, body {
     overflow: hidden;
 }
 #map{
-    transform: scale(1.5);
+    zoom: 500%;
 }
 #tool-bar{
     border: solid black;
