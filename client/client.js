@@ -17,24 +17,13 @@ var timerHeight = 90.6;
 var gridToggle = true;
 var playerX = 0;
 var playerY = 0;
+const grid = 70;
 // Onclick listeners for the buttons
 const socket = io.connect();
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
+var playerXs = [0, 0, 0, 0, 0, 0];
+var playerYs = [0, 0, 0, 0, 0, 0];
 var player = prompt("Please enter your name, etc. (James, Nicolas, Glen, Lilah, Sasha)");
-socket.emit("player", player);
-function start(){
-    console.log(socket);
-}
- // Server Connection Stuff
-socket.on("hello", function(){
-    socket.emit("hi", player);
-});
-socket.on('player-online', function(msg) {
-    $(".player-tab")[parseInt(msg)].style.backgroundColor = "green";
-});
-socket.on('player-offline', function(msg){
-    $(".player-tab")[parseInt(msg)].style.backgroundColor = "red";
-})
 
 // Function functions
 function drawGrid(x, y) {
@@ -60,20 +49,95 @@ function timer(){
         timerInterval = 0;
     }
 }
+function updateW(player){
+    for(var i = 0; i < players.length; i++){
+        if(player === players[i]){
+            playerYs[i]-=grid;
+            $("#"+players[i]).css("top", playerYs[i]);
+        }
+    }
+}
+function updateA(player){
+    for(var i = 0; i < players.length; i++){
+        if(player === players[i]){
+            playerXs[i]-=grid;
+            $("#"+players[i]).css("left", playerXs[i]);
+        }
+    }
+}
+function updateS(player){
+    for(var i = 0; i < players.length; i++){
+        if(player === players[i]){
+            playerYs[i]+=grid;
+            $("#"+players[i]).css("top", playerYs[i]);
+        }
+    }
+}
+function updateD(player){
+    for(var i = 0; i < players.length; i++){
+        if(player === players[i]){
+            playerXs[i]+=grid;
+            $("#"+players[i]).css("left", playerXs[i]);
+        }
+    }
+}
+function updatePlayers(){
+    for(var i = 0; i < players.length; i++){
+        $("#"+players[i]).css("left", playerXs[i]);
+        $("#"+players[i]).css("top", playerYs[i]);
+    }
+}
+ // Server Connection Stuff
+socket.emit("player", player);
+socket.on("hello", function(){
+    socket.emit("hi", player);
+});
+socket.on("positionX", function(X){
+    playerXs = X;
+    updatePlayers();
+});
+socket.on("positionY", function(Y){
+    playerYs = Y;
+    updatePlayers();
+});
+socket.on('player-online', function(msg) {
+    $(".player-tab")[parseInt(msg)].style.backgroundColor = "green";
+});
+socket.on('player-offline', function(msg){
+    $(".player-tab")[parseInt(msg)].style.backgroundColor = "red";
+});
+// Player location listeners
+socket.on("W", function(msg){
+    updateW(msg);
+});
+socket.on("A", function(msg){
+    updateA(msg);
+});
+socket.on("S", function(msg){
+    updateS(msg);
+});
+socket.on("D", function(msg){
+    updateD(msg);
+});
+
 // Keylisteners for players
 document.addEventListener('keyup', function(e){
     if(e.code === 'KeyW'){
-        playerY-=70;
-        $("#"+player).css("top", playerY+"px");
+        playerY-=grid;
+        socket.emit("W", player);
+        //$("#"+player).css("top", playerY+"px");
     } else if(e.code ==='KeyA'){
-        playerX-=70;
-        $("#"+player).css("left", playerX+"px");
+        playerX-=grid;
+        socket.emit("A", player);
+       // $("#"+player).css("left", playerX+"px");
     } else if(e.code ==='KeyS'){
-        playerY+=70;
-        $("#"+player).css("top", playerY+"px");
+        playerY+=grid;
+        socket.emit("S", player);
+       // $("#"+player).css("top", playerY+"px");
     } else if(e.code ==='KeyD'){
-        playerX+=70;
-        $("#"+player).css("left", playerX+"px");
+        playerX+=grid;
+        socket.emit("D", player);
+       // $("#"+player).css("left", playerX+"px");
     }
 });
 $("#countdown-bar").click(function(){

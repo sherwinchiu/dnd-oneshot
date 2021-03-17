@@ -14,7 +14,7 @@ html, body {
 .player{
     height: 70px;
     width: 70px;
-    background-color: black;
+    background-color: white;
     border-radius: 50%;
     display: block;
     z-index: 5;

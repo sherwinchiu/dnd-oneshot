@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/sherwinchiu/dnd-oneshot#readme",
   "dependencies": {
+    "jsdom": "^16.5.1",
     "socket.io": "^4.0.0"
   }
 }
