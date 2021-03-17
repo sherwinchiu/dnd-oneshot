@@ -26,7 +26,6 @@ io.sockets.on('connection', function(socket){
                 io.emit("player-online", i);
             } else{
                 online[i] = false;
-                console.log(i);
                 io.emit("player-offline", i);
             }
         }

@@ -1,7 +1,8 @@
 // Scroll Variables
 var clicking = false;
 $("#move").css("background-color", "grey");
-var zoom = 200;
+var zoom = 220;
+const mapLimits = [70, 70, 55]; 
 var move = true;
 var ping = false;
 var previousX;
@@ -15,7 +16,18 @@ var timerHeight = 90.6;
 $("#countdown-bar").click(function(){
     var timerInterval = window.setInterval(timer, 10);
 });
-    
+
+function drawGrid(x, y) {
+    for (var rows = 0; rows < y; rows++) {
+        for (var columns = 0; columns < x; columns++) {
+            $("#main-screen").append("<div style='left:"+70*columns+"px; top:"+70*rows+"px;' class='grid'></div>");
+        };
+    };
+    $(".grid").width("70px");
+    $(".grid").height("70px");
+};
+drawGrid(30, 30);
+
 function timer(){
     var d = new Date();
     if(d.getTime()-n  > 65 && timerBar <90.5){
@@ -40,17 +52,19 @@ $("#move").click(function(){
 });
 $("#zoom-in").click(function(){
     zoom+=15;
-    if(zoom>300){
-        zoom= 300;
+    if(zoom>220){
+        zoom= 220;
     }
     $("#map").css("zoom", zoom+"%");
+    $(".grid").css("zoom", zoom+"%");
 });
 $("#zoom-out").click(function(){
     zoom-=15;
-    if(zoom<100){
-        zoom =100;
+    if(zoom<55){
+        zoom =55;
     }
     $("#map").css("zoom", zoom+"%");
+    $(".grid").css("zoom", zoom+"%");
 });
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {
