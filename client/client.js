@@ -5,7 +5,7 @@
 var clicking = false;
 $("#move").css("background-color", "grey");
 var zoom = 220;
-const mapLimits = [70, 70, 55]; 
+const mapLimits = [85, 85, 55]; 
 var move = true;
 var ping = false;
 var previousX;
@@ -15,15 +15,18 @@ var n = d.getTime();
 var timerBar = 0;
 var timerHeight = 90.6;
 var gridToggle = true;
-var playerX = 0;
-var playerY = 0;
 const grid = 70;
 // Onclick listeners for the buttons
 const socket = io.connect();
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
+var playerX = 0;
+var playerY = 0;
 var playerXs = [0, 0, 0, 0, 0, 0];
 var playerYs = [0, 0, 0, 0, 0, 0];
-var player = prompt("Please enter your name, etc. (James, Nicolas, Glen, Lilah, Sasha)");
+var maxX = [2100, 2100, 3500];
+var maxY = 2100;
+var mapNum = 0;
+var player = prompt("Please enter your name, etc. (James, Nicolas, Glen, Lilah, Sasha)\nCase Sensitive so PLEASE put in your NAME WITH UPPERCASE");
 
 // Function functions
 function drawGrid(x, y) {
@@ -87,6 +90,14 @@ function updatePlayers(){
         $("#"+players[i]).css("top", playerYs[i]);
     }
 }
+function localUpdate(){
+    for(var i = 0; i < players.length; i++){
+        if (player == players[i]){
+            playerX = playerXs[i];
+            playerY = playerYs[i];
+        }
+    }
+}
  // Server Connection Stuff
 socket.emit("player", player);
 socket.on("hello", function(){
@@ -94,10 +105,12 @@ socket.on("hello", function(){
 });
 socket.on("positionX", function(X){
     playerXs = X;
+    localUpdate();
     updatePlayers();
 });
 socket.on("positionY", function(Y){
     playerYs = Y;
+    localUpdate();
     updatePlayers();
 });
 socket.on('player-online', function(msg) {
@@ -124,21 +137,34 @@ socket.on("D", function(msg){
 document.addEventListener('keyup', function(e){
     if(e.code === 'KeyW'){
         playerY-=grid;
-        socket.emit("W", player);
-        //$("#"+player).css("top", playerY+"px");
+        if(playerY < 0){
+            playerY = 0;
+        } else{
+            socket.emit("W", player);
+        }
     } else if(e.code ==='KeyA'){
         playerX-=grid;
-        socket.emit("A", player);
-       // $("#"+player).css("left", playerX+"px");
+        if(playerX < 0){
+            playerX = 0;
+        } else{
+            socket.emit("A", player);
+        }
     } else if(e.code ==='KeyS'){
         playerY+=grid;
-        socket.emit("S", player);
-       // $("#"+player).css("top", playerY+"px");
+        if(playerY >= maxY){
+            playerY -=grid;
+        } else{
+            socket.emit("S", player);
+        }
     } else if(e.code ==='KeyD'){
         playerX+=grid;
-        socket.emit("D", player);
-       // $("#"+player).css("left", playerX+"px");
+        if(playerX >= maxX[mapNum]){
+            playerX -=grid;
+        } else{
+            socket.emit("D", player);
+        }
     }
+    console.log(playerX + " " + playerY)
 });
 $("#countdown-bar").click(function(){
     var timerInterval = window.setInterval(timer, 10);
