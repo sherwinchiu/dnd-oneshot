@@ -14,7 +14,9 @@ var d = new Date();
 var n = d.getTime();
 var timerBar = 0;
 var timerHeight = 90.6;
-
+var gridToggle = true;
+var playerX = 0;
+var playerY = 0;
 // Onclick listeners for the buttons
 const socket = io.connect();
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
@@ -33,14 +35,8 @@ socket.on('player-online', function(msg) {
 socket.on('player-offline', function(msg){
     $(".player-tab")[parseInt(msg)].style.backgroundColor = "red";
 })
-socket.on('login', function(msg){
- 
-});
 
-$("#countdown-bar").click(function(){
-    var timerInterval = window.setInterval(timer, 10);
-});
-
+// Function functions
 function drawGrid(x, y) {
     for (var rows = 0; rows < y; rows++) {
         for (var columns = 0; columns < x; columns++) {
@@ -63,8 +59,36 @@ function timer(){
     if( timerBar< 90.5){
         timerInterval = 0;
     }
-    
 }
+// Keylisteners for players
+document.addEventListener('keyup', function(e){
+    if(e.code === 'KeyW'){
+        playerY-=70;
+        $("#"+player).css("top", playerY+"px");
+    } else if(e.code ==='KeyA'){
+        playerX-=70;
+        $("#"+player).css("left", playerX+"px");
+    } else if(e.code ==='KeyS'){
+        playerY+=70;
+        $("#"+player).css("top", playerY+"px");
+    } else if(e.code ==='KeyD'){
+        playerX+=70;
+        $("#"+player).css("left", playerX+"px");
+    }
+});
+$("#countdown-bar").click(function(){
+    var timerInterval = window.setInterval(timer, 10);
+});
+$("#grid-toggle").click(function(){
+    if(gridToggle){
+        gridToggle = false;
+        $(".grid").css("display", "none");
+    } else{
+        gridToggle = true;
+        $(".grid").css("display", "block");
+    }
+})
+
 $("#move").click(function(){
     if(!move){
         $("#move").css("background-color", "grey");
@@ -81,6 +105,7 @@ $("#zoom-in").click(function(){
     }
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
+    $(".player").css("zoom", zoom+"%");
 });
 $("#zoom-out").click(function(){
     zoom-=15;
@@ -89,6 +114,7 @@ $("#zoom-out").click(function(){
     }
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
+    $(".player").css("zoom", zoom+"%");
 });
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {

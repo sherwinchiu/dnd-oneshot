@@ -11,6 +11,20 @@ html, body {
     height: 8.95vh;
     user-select: none
 }
+.player{
+    height: 70px;
+    width: 70px;
+    background-color: black;
+    border-radius: 50%;
+    display: block;
+    z-index: 5;
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    zoom: 220%;
+    top: 0px;
+    left: 0px;
+}
 .option{
     display: block;
     float: left;
@@ -37,7 +51,7 @@ html, body {
     margin:0;
 	padding:0;
 	border: none;
-	outline:1px solid #000;
+	outline:1px dotted #000;
 	display: block;
     position:absolute;
     z-index: 999;
@@ -111,4 +125,8 @@ html, body {
     background-color: black;
     padding: none;
     margin: none;
+}
+#James{
+    top: 0px;
+    left: 0px;
 }
