@@ -11,8 +11,6 @@ var optionNames = ["#move", "#line", "#circle", "#square", "#cone", "#ping"];
 var options = [true, false, false, false, false, false];
             //move, line, circle, square, cone, ping
 
-var previousX;
-var previousY;
 var d = new Date();
 var n = d.getTime();
 var timerBar = 0;
@@ -30,6 +28,13 @@ var maxX = [2100, 2100, 3500];
 var maxY = 2100;
 var mapNum = 0;
 var player = prompt("Please enter your name, etc. (James, Nicolas, Glen, Lilah, Sasha)\nCase Sensitive so PLEASE put in your NAME WITH UPPERCASE");
+var pointValue = false;
+var pointX = 0;
+var pointY = 0;
+
+var c = document.getElementById("canvas");
+var ctx = c.getContext("2d");
+// Main code to run instantly
 
 // Function functions
 function drawGrid(x, y) {
@@ -41,7 +46,7 @@ function drawGrid(x, y) {
     $(".grid").width("70px");
     $(".grid").height("70px");
 };
-drawGrid(30, 30);
+
 
 function timer(){
     var d = new Date();
@@ -117,6 +122,10 @@ function changeOption(n){
         $(optionNames[n]).css("background-color", "grey");
     }
 }
+if (player === players[0]){
+
+}
+drawGrid(30, 30);
  // Server Connection Stuff
 socket.emit("player", player);
 socket.on("hello", function(){
@@ -199,6 +208,7 @@ $("#zoom-in").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
+    $(".canvas").css("zoom", zoom+"%");
 });
 $("#zoom-out").click(function(){
     zoom-=15;
@@ -208,6 +218,8 @@ $("#zoom-out").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
+    $(".canvas").css("zoom", zoom+"%");
+
 });
 $("#line").click(function(){
     changeOption(1);
@@ -237,34 +249,32 @@ $("#grid-toggle").click(function(){
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {
     e.preventDefault(); // mouse event
-    if(options[0]){
-        previousX = e.clientX; // Get the mouse x
-        previousY = e.clientY; // Get mouse y
-        clicking = true; // since in main screen and click, clicking
-    } else if(options[1]){
-        console.log("1");
-    } else if(options[2]){
-        $("#main-screen").append("<div style='left:"+e.clientX+"px; top:"+e.clientY+"px;' class='grid'></div>");
-        console.log("2");
-    } else if(options[3]){
-        console.log("3");
-    } else if(options[4]){
-        console.log("4");
-    } else if(options[5]){
-        console.log("5");
+    pointX = e.clientX;
+    pointY = e.clientY;
+    clicking = true;
+    if(options[1] && !pointValue){
+        pointValue = true;
+        ctx.beginPath();
+        ctx.moveTo(pointX, pointY);
+    } else if (options[1] && pointValue){
+        pointValue = false;
+        ctx.lineTo(pointX, pointY);
+        ctx.stroke();
     }
+  
 });
 $(document).mouseup(function() {
     clicking = false; // if mouse isn't clicked, not clicking
 });
 
 $("#main-screen").mousemove(function(e) {
-    if (clicking) { // if clicked down
+    if (clicking && options[0]) { // if clicked down
         e.preventDefault(); // get mouse event
-        $("#main-screen").scrollLeft($("#main-screen").scrollLeft() + (previousX - e.clientX)); // scroll left for however much the difference between onclick and drag is 
-        $("#main-screen").scrollTop($("#main-screen").scrollTop() + (previousY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
-        previousX = e.clientX; //update previous x for smoother transition
-        previousY = e.clientY; //update previous y for smoother transition
+        $("#main-screen").scrollLeft($("#main-screen").scrollLeft() + (pointX - e.clientX)); // scroll left for however much the difference between onclick and drag is 
+        $("#main-screen").scrollTop($("#main-screen").scrollTop() + (pointY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
+        pointX = e.clientX; //update point x for smoother transition
+        pointY = e.clientY; //update point y for smoother transition
+    } else if(options[1] && pointValue){
     }
 });
 $("#main-screen").mouseleave(function(e) {

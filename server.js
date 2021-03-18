@@ -17,6 +17,7 @@ var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
 var playerXs = [0, 0, 0, 0, 0, 0];
 var playerYs = [0, 0, 0, 0, 0, 0];
 var online = [false, false, false, false, false, false];
+var points = [false, false];
 
 // Standard functions
 function moveW(player){
@@ -52,7 +53,6 @@ function moveD(player){
     }
 }
 server.listen(port);
-
 app.use(express.static(__dirname+"/client"));
 app.use(express.static(__dirname));
 app.get('/', function(req, res){

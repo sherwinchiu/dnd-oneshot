@@ -72,7 +72,6 @@ html, body {
     zoom: 220%;
     z-index: -1;
     position: relative;
-    
 }
 #tool-bar{
     border: solid black;
@@ -125,6 +124,14 @@ html, body {
     background-color: black;
     padding: none;
     margin: none;
+}
+#canvas{
+    height: 2100px;
+    width: 2100px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1;
 }
 #James{
     top: 0px;
