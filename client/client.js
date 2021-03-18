@@ -6,8 +6,10 @@ var clicking = false;
 $("#move").css("background-color", "grey");
 var zoom = 220;
 const mapLimits = [85, 85, 55]; 
-var move = true;
-var ping = false;
+// move, line, circle, square, cone, ping
+var options = [true, false, false, false, false, false];
+            //move, line, circle, square, cone, ping
+
 var previousX;
 var previousY;
 var d = new Date();
@@ -15,7 +17,7 @@ var n = d.getTime();
 var timerBar = 0;
 var timerHeight = 90.6;
 var gridToggle = true;
-const grid = 70;
+const grid = 35;
 // Onclick listeners for the buttons
 const socket = io.connect();
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
@@ -98,6 +100,12 @@ function localUpdate(){
         }
     }
 }
+function resetOptions(n){
+    for(var i = 0; i < options.length; i++){
+        options[i] = false;
+    }
+    options[n] = true;
+}
  // Server Connection Stuff
 socket.emit("player", player);
 socket.on("hello", function(){
@@ -164,28 +172,18 @@ document.addEventListener('keyup', function(e){
             socket.emit("D", player);
         }
     }
-    console.log(playerX + " " + playerY)
 });
 $("#countdown-bar").click(function(){
     var timerInterval = window.setInterval(timer, 10);
 });
-$("#grid-toggle").click(function(){
-    if(gridToggle){
-        gridToggle = false;
-        $(".grid").css("display", "none");
-    } else{
-        gridToggle = true;
-        $(".grid").css("display", "block");
-    }
-})
 
 $("#move").click(function(){
-    if(!move){
-        $("#move").css("background-color", "grey");
-        move = true;
-    } else{
+    if(options[0]){
         $("#move").css("background-color", "white");
-        move = false;
+        options[0] = false;
+    } else{
+        $("#move").css("background-color", "grey");
+        resetOptions(0);
     }
 });
 $("#zoom-in").click(function(){
@@ -206,13 +204,68 @@ $("#zoom-out").click(function(){
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
 });
+$("#line").click(function(){
+    if(options[1]){
+        options[1] = false;
+    } else{
+        resetOptions(1);
+    }
+});
+$("#circle").click(function(){
+    if(options[2]){
+        options[2] = false;
+    } else{
+        resetOptions(2);
+    }
+});
+$("#square").click(function(){
+    if(options[3]){
+        options[3] = false;
+    } else{
+        resetOptions(3);
+    }
+});
+$("#cone").click(function(){
+    if(options[4]){
+        options[4] = false;
+    } else{
+        resetOptions(4);
+    }
+});
+$("#ping").click(function(){
+    if(options[5]){
+        options[5] = false;
+    } else{
+        resetOptions(5);
+    }
+});
+$("#grid-toggle").click(function(){
+    if(gridToggle){
+        gridToggle = false;
+        $(".grid").css("display", "none");
+    } else{
+        gridToggle = true;
+        $(".grid").css("display", "block");
+    }
+})
+
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {
     e.preventDefault(); // mouse event
-    if(move){
+    if(options[0]){
         previousX = e.clientX; // Get the mouse x
         previousY = e.clientY; // Get mouse y
         clicking = true; // since in main screen and click, clicking
+    } else if(options[1]){
+
+    } else if(options[2]){
+
+    } else if(options[3]){
+
+    } else if(options[4]){
+
+    } else if(options[5]){
+
     }
 });
 $(document).mouseup(function() {
