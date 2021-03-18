@@ -7,6 +7,7 @@ $("#move").css("background-color", "grey");
 var zoom = 220;
 const mapLimits = [85, 85, 55]; 
 // move, line, circle, square, cone, ping
+var optionNames = ["#move", "#line", "#circle", "#square", "#cone", "#ping"];
 var options = [true, false, false, false, false, false];
             //move, line, circle, square, cone, ping
 
@@ -100,11 +101,21 @@ function localUpdate(){
         }
     }
 }
-function resetOptions(n){
+function resetOptions(){
     for(var i = 0; i < options.length; i++){
         options[i] = false;
+        $(optionNames[i]).css("background-color", "white");
     }
-    options[n] = true;
+}
+function changeOption(n){
+    if(options[n]){
+        $(optionNames[n]).css("background-color", "white");
+        options[n] = false;
+    } else{
+        resetOptions();
+        options[n] = true;
+        $(optionNames[n]).css("background-color", "grey");
+    }
 }
  // Server Connection Stuff
 socket.emit("player", player);
@@ -178,13 +189,7 @@ $("#countdown-bar").click(function(){
 });
 
 $("#move").click(function(){
-    if(options[0]){
-        $("#move").css("background-color", "white");
-        options[0] = false;
-    } else{
-        $("#move").css("background-color", "grey");
-        resetOptions(0);
-    }
+    changeOption(0);
 });
 $("#zoom-in").click(function(){
     zoom+=15;
@@ -205,39 +210,19 @@ $("#zoom-out").click(function(){
     $(".player").css("zoom", zoom+"%");
 });
 $("#line").click(function(){
-    if(options[1]){
-        options[1] = false;
-    } else{
-        resetOptions(1);
-    }
+    changeOption(1);
 });
 $("#circle").click(function(){
-    if(options[2]){
-        options[2] = false;
-    } else{
-        resetOptions(2);
-    }
+    changeOption(2);
 });
 $("#square").click(function(){
-    if(options[3]){
-        options[3] = false;
-    } else{
-        resetOptions(3);
-    }
+    changeOption(3);
 });
 $("#cone").click(function(){
-    if(options[4]){
-        options[4] = false;
-    } else{
-        resetOptions(4);
-    }
+    changeOption(4);
 });
 $("#ping").click(function(){
-    if(options[5]){
-        options[5] = false;
-    } else{
-        resetOptions(5);
-    }
+    changeOption(5);
 });
 $("#grid-toggle").click(function(){
     if(gridToggle){
@@ -257,15 +242,16 @@ $("#main-screen").mousedown(function(e) {
         previousY = e.clientY; // Get mouse y
         clicking = true; // since in main screen and click, clicking
     } else if(options[1]){
-
+        console.log("1");
     } else if(options[2]){
-
+        $("#main-screen").append("<div style='left:"+e.clientX+"px; top:"+e.clientY+"px;' class='grid'></div>");
+        console.log("2");
     } else if(options[3]){
-
+        console.log("3");
     } else if(options[4]){
-
+        console.log("4");
     } else if(options[5]){
-
+        console.log("5");
     }
 });
 $(document).mouseup(function() {
