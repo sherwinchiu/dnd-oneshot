@@ -149,24 +149,26 @@ function calcDistance(x1, x2, y1, y2){
 }
 function adjustObject(n, i){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    console.log(startPoint[0], startPoint[1], realPointX, realPointY);
+    
     startPoint[0] = startPoint[0]/(zoom+n)*zoom;
     startPoint[1] = startPoint[1]/(zoom+n)*zoom;
     realPointX =realPointX/(zoom+n)*zoom;
     realPointY = realPointY/(zoom+n)*zoom;
     realLeftScroll = realLeftScroll/(zoom+n)*zoom;
     realTopScroll = realTopScroll/(zoom+n)*zoom;
+    
     ctx.beginPath();
     if(i===1){
         ctx.moveTo(startPoint[0], startPoint[1]);
         ctx.lineTo(realPointX+realLeftScroll, realPointY+realTopScroll);
     } else if(i===2){
         ctx.arc(startPoint[0], startPoint[1], (distance*70*zoom/100.0)/(zoom+n)*zoom,0, 2*Math.PI);
+    } else if(i===3){
+        ctx.rect(startPoint[0], startPoint[1], realPointX+realLeftScroll, realPointY+realTopScroll);
     }
     ctx.stroke();
     ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
 }
-
 function drawFinalObject(n){
     if(n===1){
         pointValue = false;
@@ -292,7 +294,7 @@ $("#zoom-in").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-
+    //$("#canvas").css("zoom", zoom+"%");
 });
 $("#zoom-out").click(function(){
     zoom-=15;
@@ -309,7 +311,7 @@ $("#zoom-out").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-    
+  //  $("#canvas").css("zoom", zoom+"%");
 });
 $("#line").click(function(){
     changeOption(1);
@@ -370,6 +372,8 @@ $("#main-screen").mousemove(function(e) {
         e.preventDefault(); // get mouse event
         $("#main-screen").scrollLeft(leftScroll + (pointX - e.clientX)); // scroll left for however much the difference between onclick and drag is 
         $("#main-screen").scrollTop(topScroll + (pointY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
+      //  $("#canvas").css("left", leftScroll + (pointX - e.clientX)); // scroll left for however much the difference between onclick and drag is 
+       // $("#canvas").css("top", topScroll + (pointY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
     } else if(options[1] && pointValue){ 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();

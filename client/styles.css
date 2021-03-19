@@ -126,8 +126,6 @@ html, body {
     margin: none;
 }
 #canvas{
-    height: 2100px;
-    width: 2100px;
     position: absolute;
     top: 0px;
     left: 0px;
