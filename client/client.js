@@ -10,7 +10,7 @@ const mapLimits = [85, 85, 55];
 var optionNames = ["#move", "#line", "#circle", "#square", "#cone", "#ping"];
 var options = [true, false, false, false, false, false];
             //move, line, circle, square, cone, ping
-
+var drawnObject = [false, false, false, false, false];
 var d = new Date();
 var n = d.getTime();
 var timerBar = 0;
@@ -33,8 +33,13 @@ var pointX = 0;
 var pointY = 0;
 var startPoint = [0, 0];
 var distance = 0;
+var adjustDistance = 0;
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
+
+var zoomOutMax = false;
+var zoomInMax = false;
+
 ctx.lineWidth = 5;
 ctx.font="14px verdana";
 ctx.fillStyle = "red";
@@ -147,7 +152,7 @@ function adjustObject(n, i){
         ctx.moveTo(startPoint[0], startPoint[1]);
         ctx.lineTo(pointX, pointY);
     } else if(i===2){
-        ctx.arc(startPoint[0], startPoint[1], distance/(zoom+n)*zoom*70,0, 2*Math.PI);
+        ctx.arc(startPoint[0], startPoint[1], (distance*70*zoom/100.0)/(zoom+n)*zoom,0, 2*Math.PI);
     }
     ctx.stroke();
     ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+pointX)/2, (startPoint[1]+pointY-20)/2);
@@ -160,8 +165,14 @@ function drawFinalObject(n){
         ctx.stroke();
     } else if(n===2){
         pointValue = false;
-        ctx.arc(startPoint[0], startPoint[1], distance*70,0, 2*Math.PI);
+        ctx.arc(startPoint[0], startPoint[1], distance*70*zoom/100.0,0, 2*Math.PI);
         ctx.stroke();
+    }
+}
+function resetObjects(){
+    for(var i = 0; i < 5; i++){
+        drawnObject[i] = false;
+
     }
 }
 //Main code to run for real
@@ -256,11 +267,13 @@ $("#move").click(function(){
 });
 $("#zoom-in").click(function(){
     zoom+=15;
+    zoomOutMax = false;
     if(zoom>220){
         zoom= 220;
+        zoomInMax = true;
     } 
-    for(var i = 0; i < options.length; i++){
-        if(options[i] && !(zoom === 220)){
+    for(var i = 1; i < options.length; i++){
+        if(drawnObject[i] && (!zoomInMax)){
             adjustObject(-15, i);
         }
     }
@@ -271,11 +284,13 @@ $("#zoom-in").click(function(){
 });
 $("#zoom-out").click(function(){
     zoom-=15;
+    zoomInMax = false;
     if(zoom<100){
         zoom =100;
+        zoomOutMax = true;
     } 
-    for(var i = 0; i < options.length; i++){
-        if(options[i] && !(zoom === 100)){
+    for(var i = 1; i < options.length; i++){
+        if(drawnObject[i] &&!zoomOutMax){
             adjustObject(15, i);
         }
     }
@@ -315,13 +330,15 @@ $("#main-screen").mousedown(function(e) {
     pointX = e.clientX;
     pointY = e.clientY;
     clicking = true;
-    for(var i = 0; i < options.length; i++){
+    for(var i = 1; i < options.length; i++){
         if(options[i] && !pointValue){
             pointValue = true;
             startPoint[0] = pointX;
             startPoint[1] = pointY;
+            resetObjects();
         } else if(options[i] && pointValue){
             drawFinalObject(i);
+            drawnObject[i] = true;
         }
     }
     
@@ -353,7 +370,7 @@ $("#main-screen").mousemove(function(e) {
         distance = calcDistance(0, e.clientX-startPoint[0], 0, e.clientY-startPoint[1]);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
-        ctx.arc(startPoint[0], startPoint[1], distance*70,0, 2*Math.PI);
+        ctx.arc(startPoint[0], startPoint[1], distance*70*zoom/100.0,0, 2*Math.PI);
         ctx.stroke();
         ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX)/2, (startPoint[1]+e.clientY-20)/2);
         pointX = e.clientX; //update point x for smoother transition
