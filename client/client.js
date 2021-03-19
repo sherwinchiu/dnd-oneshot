@@ -136,17 +136,33 @@ function calcDistance(x1, x2, y1, y2){
     y2/=70.0;
     return Math.round(Math.sqrt(Math.pow((x2-x1), 2) + Math.pow((y2-y1), 2))*100/(zoom/100.0))/100.0;
 }
-function adjustLine(n){
+function adjustObject(n, i){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     startPoint[0] = startPoint[0]/(zoom+n)*zoom;
     startPoint[1] = startPoint[1]/(zoom+n)*zoom;
     pointX =pointX/(zoom+n)*zoom;
     pointY = pointY/(zoom+n)*zoom;
     ctx.beginPath();
-    ctx.moveTo(startPoint[0], startPoint[1]);
-    ctx.lineTo(pointX, pointY);
+    if(i===1){
+        ctx.moveTo(startPoint[0], startPoint[1]);
+        ctx.lineTo(pointX, pointY);
+    } else if(i===2){
+        ctx.arc(startPoint[0], startPoint[1], distance/(zoom+n)*zoom*70,0, 2*Math.PI);
+    }
     ctx.stroke();
-    ctx.fillText(player+" "+ distance, (startPoint[0]+pointX)/2, (startPoint[1]+pointY-20)/2);
+    ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+pointX)/2, (startPoint[1]+pointY-20)/2);
+}
+
+function drawFinalObject(n){
+    if(n===1){
+        pointValue = false;
+        ctx.lineTo(pointX, pointY);
+        ctx.stroke();
+    } else if(n===2){
+        pointValue = false;
+        ctx.arc(startPoint[0], startPoint[1], distance*70,0, 2*Math.PI);
+        ctx.stroke();
+    }
 }
 //Main code to run for real
 /*
@@ -242,8 +258,11 @@ $("#zoom-in").click(function(){
     zoom+=15;
     if(zoom>220){
         zoom= 220;
-    } else if(options[1]){
-        adjustLine(-15);
+    } 
+    for(var i = 0; i < options.length; i++){
+        if(options[i] && !(zoom === 220)){
+            adjustObject(-15, i);
+        }
     }
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
@@ -252,10 +271,13 @@ $("#zoom-in").click(function(){
 });
 $("#zoom-out").click(function(){
     zoom-=15;
-    if(zoom<55){
-        zoom =55;
-    } else if(options[1]){
-        adjustLine(15);
+    if(zoom<100){
+        zoom =100;
+    } 
+    for(var i = 0; i < options.length; i++){
+        if(options[i] && !(zoom === 100)){
+            adjustObject(15, i);
+        }
     }
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
@@ -293,15 +315,17 @@ $("#main-screen").mousedown(function(e) {
     pointX = e.clientX;
     pointY = e.clientY;
     clicking = true;
-    if(options[1] && !pointValue){
-        pointValue = true;
-        startPoint[0] = pointX;
-        startPoint[1] = pointY;
-    } else if (options[1] && pointValue){
-        pointValue = false;
-        ctx.lineTo(pointX, pointY);
-        ctx.stroke();
+    for(var i = 0; i < options.length; i++){
+        if(options[i] && !pointValue){
+            pointValue = true;
+            startPoint[0] = pointX;
+            startPoint[1] = pointY;
+        } else if(options[i] && pointValue){
+            drawFinalObject(i);
+        }
     }
+    
+    
   
 });
 $(document).mouseup(function() {
@@ -322,12 +346,20 @@ $("#main-screen").mousemove(function(e) {
         ctx.lineTo(e.clientX, e.clientY);
         ctx.stroke();
         distance = calcDistance(0, e.clientX-startPoint[0], 0, e.clientY-startPoint[1]);
-        ctx.fillText(player +" "+distance, (startPoint[0]+e.clientX)/2, (startPoint[1]+e.clientY-20)/2);
+        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX)/2, (startPoint[1]+e.clientY-20)/2);
         pointX = e.clientX; //update point x for smoother transition
         pointY = e.clientY; //update point y for smoother transition
     } else if(options[2] && pointValue){
-        
+        distance = calcDistance(0, e.clientX-startPoint[0], 0, e.clientY-startPoint[1]);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.arc(startPoint[0], startPoint[1], distance*70,0, 2*Math.PI);
+        ctx.stroke();
+        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX)/2, (startPoint[1]+e.clientY-20)/2);
+        pointX = e.clientX; //update point x for smoother transition
+        pointY = e.clientY; //update point y for smoother transition
     }
+    
     
 });
 $("#main-screen").mouseleave(function(e) {
