@@ -32,11 +32,12 @@ var pointValue = false;
 var pointX = 0;
 var pointY = 0;
 var startPoint = [0, 0];
-
-var canvas = document.createElement("canvas");
-canvas.id = "canvas";
-document.getElementById("main-screen").appendChild(canvas);
+var distance = 0;
+var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
+ctx.lineWidth = 5;
+ctx.font="14px verdana";
+ctx.fillStyle = "red";
 // Main code to run instantly
 
 // Function functions
@@ -128,6 +129,37 @@ function changeOption(n){
         $(optionNames[n]).css("background-color", "grey");
     }
 }
+function calcDistance(x1, x2, y1, y2){
+    x1/=70.0;
+    x2/=70.0;
+    y1/=70.0;
+    y2/=70.0;
+    return Math.round(Math.sqrt(Math.pow((x2-x1), 2) + Math.pow((y2-y1), 2))*100/(zoom/100.0))/100.0;
+}
+function adjustLine(n){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    startPoint[0] = startPoint[0]/(zoom+n)*zoom;
+    startPoint[1] = startPoint[1]/(zoom+n)*zoom;
+    pointX =pointX/(zoom+n)*zoom;
+    pointY = pointY/(zoom+n)*zoom;
+    ctx.beginPath();
+    ctx.moveTo(startPoint[0], startPoint[1]);
+    ctx.lineTo(pointX, pointY);
+    ctx.stroke();
+    ctx.fillText(player+" "+ distance, (startPoint[0]+pointX)/2, (startPoint[1]+pointY-20)/2);
+}
+//Main code to run for real
+/*
+var background = new Image();
+background.src = "/maps/map1.png";
+background.onload = function(){
+    ctx.drawImage(background, 0, 0)
+}
+*/
+/*
+var pic = document.getElementById("map");
+ctx.drawImage(pic,0, 0);
+*/
 if (player === players[0]){
 
 }
@@ -210,26 +242,25 @@ $("#zoom-in").click(function(){
     zoom+=15;
     if(zoom>220){
         zoom= 220;
+    } else if(options[1]){
+        adjustLine(-15);
     }
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-    ctx.scale(zoom/100.0, zoom/100.0);
-    //$(".canvas").css("zoom", zoom+"%");
+
 });
 $("#zoom-out").click(function(){
     zoom-=15;
     if(zoom<55){
         zoom =55;
+    } else if(options[1]){
+        adjustLine(15);
     }
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-    console.log(zoom/100.0);
-    ctx.scale(zoom/100.0, zoom/100.0);
-  //  $(".canvas").css("zoom", zoom+"%");
     
-
 });
 $("#line").click(function(){
     changeOption(1);
@@ -266,11 +297,8 @@ $("#main-screen").mousedown(function(e) {
         pointValue = true;
         startPoint[0] = pointX;
         startPoint[1] = pointY;
-        //ctx.beginPath();
-        //ctx.moveTo(pointX, pointY);
     } else if (options[1] && pointValue){
         pointValue = false;
-        clearInterval = 0;
         ctx.lineTo(pointX, pointY);
         ctx.stroke();
     }
@@ -293,7 +321,14 @@ $("#main-screen").mousemove(function(e) {
         ctx.moveTo(startPoint[0], startPoint[1]);
         ctx.lineTo(e.clientX, e.clientY);
         ctx.stroke();
+        distance = calcDistance(0, e.clientX-startPoint[0], 0, e.clientY-startPoint[1]);
+        ctx.fillText(player +" "+distance, (startPoint[0]+e.clientX)/2, (startPoint[1]+e.clientY-20)/2);
+        pointX = e.clientX; //update point x for smoother transition
+        pointY = e.clientY; //update point y for smoother transition
+    } else if(options[2] && pointValue){
+        
     }
+    
 });
 $("#main-screen").mouseleave(function(e) {
     clicking = false; // if mouse isn't in screen, not clicking
