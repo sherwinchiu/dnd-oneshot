@@ -149,14 +149,12 @@ function calcDistance(x1, x2, y1, y2){
 }
 function adjustObject(n, i){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     startPoint[0] = startPoint[0]/(zoom+n)*zoom;
     startPoint[1] = startPoint[1]/(zoom+n)*zoom;
     realPointX =realPointX/(zoom+n)*zoom;
     realPointY = realPointY/(zoom+n)*zoom;
     realLeftScroll = realLeftScroll/(zoom+n)*zoom;
     realTopScroll = realTopScroll/(zoom+n)*zoom;
-    
     ctx.beginPath();
     if(i===1){
         ctx.moveTo(startPoint[0], startPoint[1]);
@@ -164,7 +162,7 @@ function adjustObject(n, i){
     } else if(i===2){
         ctx.arc(startPoint[0], startPoint[1], (distance*70*zoom/100.0)/(zoom+n)*zoom,0, 2*Math.PI);
     } else if(i===3){
-        ctx.rect(startPoint[0], startPoint[1], realPointX+realLeftScroll, realPointY+realTopScroll);
+        ctx.rect(startPoint[0], startPoint[1], realPointX+realLeftScroll-startPoint[0], realPointY+realTopScroll-startPoint[1]);
     }
     ctx.stroke();
     ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
@@ -294,7 +292,8 @@ $("#zoom-in").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-    //$("#canvas").css("zoom", zoom+"%");
+   // $("#canvas").css("zoom", zoom+"%");
+    //ctx.scale(zoom/100, zoom/100);
 });
 $("#zoom-out").click(function(){
     zoom-=15;
@@ -311,7 +310,8 @@ $("#zoom-out").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-  //  $("#canvas").css("zoom", zoom+"%");
+   // $("#canvas").css("zoom", zoom+"%");
+    //ctx.scale(zoom/100, zoom/100);
 });
 $("#line").click(function(){
     changeOption(1);
@@ -350,6 +350,7 @@ $("#main-screen").mousedown(function(e) {
             startPoint[0] = pointX+$("#main-screen").scrollLeft();
             startPoint[1] = pointY+$("#main-screen").scrollTop();
             resetObjects();
+            console.log(startPoint[0], startPoint[1], pointX, pointY);
         } else if(options[i] && pointValue){
             realPointX = pointX;
             realPointY = pointY;
