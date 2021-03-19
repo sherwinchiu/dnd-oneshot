@@ -41,8 +41,11 @@ var zoomOutMax = false;
 var zoomInMax = false;
 var leftScroll = 0;
 var topScroll = 0;
-var scrollObjectsX = [0, 0, 0, 0, 0];
-var scrollObjectsY = [0, 0, 0, 0, 0];
+
+var realPointX = 0;
+var realPointY = 0;
+var realLeftScroll = 0;
+var realTopScroll = 0;
 ctx.lineWidth = 5;
 ctx.font="14px verdana";
 ctx.fillStyle = "red";
@@ -146,38 +149,42 @@ function calcDistance(x1, x2, y1, y2){
 }
 function adjustObject(n, i){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    console.log(startPoint[0], startPoint[1], realPointX, realPointY);
     startPoint[0] = startPoint[0]/(zoom+n)*zoom;
     startPoint[1] = startPoint[1]/(zoom+n)*zoom;
-    pointX =pointX/(zoom+n)*zoom;
-    pointY = pointY/(zoom+n)*zoom;
+    realPointX =realPointX/(zoom+n)*zoom;
+    realPointY = realPointY/(zoom+n)*zoom;
+    realLeftScroll = realLeftScroll/(zoom+n)*zoom;
+    realTopScroll = realTopScroll/(zoom+n)*zoom;
     ctx.beginPath();
     if(i===1){
         ctx.moveTo(startPoint[0], startPoint[1]);
-        ctx.lineTo(pointX, pointY);
+        ctx.lineTo(realPointX+realLeftScroll, realPointY+realTopScroll);
     } else if(i===2){
         ctx.arc(startPoint[0], startPoint[1], (distance*70*zoom/100.0)/(zoom+n)*zoom,0, 2*Math.PI);
     }
     ctx.stroke();
-    ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+pointX)/2, (startPoint[1]+pointY-20)/2);
+    ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
 }
 
 function drawFinalObject(n){
-    scrollObjectsX[n-1] = leftScroll;
-    scrollObjectsY[n-1] = topScroll;
     if(n===1){
         pointValue = false;
-        ctx.lineTo(pointX+scrollObjectsX[n-1], pointY+scrollObjectsY[n-1]);
+        ctx.lineTo(pointX+leftScroll, pointY+topScroll);
         ctx.stroke();
     } else if(n===2){
         pointValue = false;
-        ctx.arc(startPoint[0]+scrollObjectsX[n-1], startPoint[1]+scrollObjectsY[n-1], distance*70*zoom/100.0,0, 2*Math.PI);
+        ctx.arc(startPoint[0], startPoint[1], distance*70*zoom/100.0,0, 2*Math.PI);
+        ctx.stroke();
+    } else if(n===3){
+        pointValue = false;
+        ctx.rect(startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll);
         ctx.stroke();
     }
 }
 function resetObjects(){
     for(var i = 0; i < 5; i++){
         drawnObjects[i] = false;
-
     }
 }
 //Main code to run for real
@@ -342,9 +349,13 @@ $("#main-screen").mousedown(function(e) {
             startPoint[1] = pointY+$("#main-screen").scrollTop();
             resetObjects();
         } else if(options[i] && pointValue){
+            realPointX = pointX;
+            realPointY = pointY;
+            realLeftScroll = leftScroll;
+            realTopScroll = topScroll;
             drawFinalObject(i);
             drawnObjects[i] = true;
-        }
+        } 
     }
 });
 $(document).mouseup(function() {
@@ -368,12 +379,19 @@ $("#main-screen").mousemove(function(e) {
         distance = calcDistance(0, e.clientX-startPoint[0]+leftScroll, 0, e.clientY-startPoint[1]+topScroll);
         ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX+leftScroll)/2, (startPoint[1]+e.clientY-20+topScroll)/2);
     } else if(options[2] && pointValue){
-        distance = calcDistance(0, e.clientX-startPoint[0], 0, e.clientY-startPoint[1]);
+        distance = calcDistance(0, e.clientX-startPoint[0]+leftScroll, 0, e.clientY-startPoint[1]+topScroll);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
         ctx.arc(startPoint[0], startPoint[1], distance*70*zoom/100.0,0, 2*Math.PI);
         ctx.stroke();
-        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX)/2, (startPoint[1]+e.clientY-20)/2);
+        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX+leftScroll)/2, (startPoint[1]+e.clientY-20+topScroll)/2);
+    } else if(options[3] && pointValue){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.rect(startPoint[0], startPoint[1], e.clientX-startPoint[0]+leftScroll, e.clientY-startPoint[1]+topScroll);
+        ctx.stroke();
+        distance = calcDistance(0, e.clientX-startPoint[0]+leftScroll, 0, e.clientY-startPoint[1]+topScroll);
+        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX+leftScroll)/2, (startPoint[1]+e.clientY-20+topScroll)/2);
     }
     if (options[0] || pointValue || clicking){
         pointX = e.clientX; //update point x for smoother transition
