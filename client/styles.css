@@ -132,6 +132,8 @@ html, body {
     top: 0px;
     left: 0px;
     z-index: -1;
+    opacity: 0%;
+    
 }
 #James{
     top: 0px;

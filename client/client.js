@@ -31,9 +31,12 @@ var player = prompt("Please enter your name, etc. (James, Nicolas, Glen, Lilah, 
 var pointValue = false;
 var pointX = 0;
 var pointY = 0;
+var startPoint = [0, 0];
 
-var c = document.getElementById("canvas");
-var ctx = c.getContext("2d");
+var canvas = document.createElement("canvas");
+canvas.id = "canvas";
+document.getElementById("main-screen").appendChild(canvas);
+var ctx = canvas.getContext("2d");
 // Main code to run instantly
 
 // Function functions
@@ -59,6 +62,9 @@ function timer(){
     if( timerBar< 90.5){
         timerInterval = 0;
     }
+}
+function updater(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 function updateW(player){
     for(var i = 0; i < players.length; i++){
@@ -208,7 +214,8 @@ $("#zoom-in").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-    $(".canvas").css("zoom", zoom+"%");
+    ctx.scale(zoom/100.0, zoom/100.0);
+    //$(".canvas").css("zoom", zoom+"%");
 });
 $("#zoom-out").click(function(){
     zoom-=15;
@@ -218,7 +225,10 @@ $("#zoom-out").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-    $(".canvas").css("zoom", zoom+"%");
+    console.log(zoom/100.0);
+    ctx.scale(zoom/100.0, zoom/100.0);
+  //  $(".canvas").css("zoom", zoom+"%");
+    
 
 });
 $("#line").click(function(){
@@ -254,10 +264,13 @@ $("#main-screen").mousedown(function(e) {
     clicking = true;
     if(options[1] && !pointValue){
         pointValue = true;
-        ctx.beginPath();
-        ctx.moveTo(pointX, pointY);
+        startPoint[0] = pointX;
+        startPoint[1] = pointY;
+        //ctx.beginPath();
+        //ctx.moveTo(pointX, pointY);
     } else if (options[1] && pointValue){
         pointValue = false;
+        clearInterval = 0;
         ctx.lineTo(pointX, pointY);
         ctx.stroke();
     }
@@ -274,7 +287,12 @@ $("#main-screen").mousemove(function(e) {
         $("#main-screen").scrollTop($("#main-screen").scrollTop() + (pointY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
         pointX = e.clientX; //update point x for smoother transition
         pointY = e.clientY; //update point y for smoother transition
-    } else if(options[1] && pointValue){
+    } else if(options[1] && pointValue){ 
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(startPoint[0], startPoint[1]);
+        ctx.lineTo(e.clientX, e.clientY);
+        ctx.stroke();
     }
 });
 $("#main-screen").mouseleave(function(e) {
