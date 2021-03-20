@@ -89,7 +89,19 @@ io.sockets.on('connection', function(socket){
     socket.on("D", function(msg){
         moveD(msg);
     });
-
+    // Events for player lines
+    socket.on("line", function(msg){ // [name, point1, point2, point3, point4, zoom]
+        io.emit("line", msg);
+    });
+    socket.on("circle", function(msg){ // [name, point1, point2, radius, zoom]
+        io.emit("circle", msg);
+    });
+    socket.on("square", function(msg){ // [name, point1, point2, width, radius, zoom]
+        io.emit("square", msg);
+    });
+    socket.on("ping", function(msg){ // [name, point1, point2, zoom]
+        io.emit("ping", msg);
+    });
     // Check for disconnect
     socket.on('disconnect', function(msg) {
         online = [false, false, false, false, false, false];

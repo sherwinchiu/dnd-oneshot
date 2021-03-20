@@ -189,11 +189,11 @@ function drawFinalObject(n){
         ctx.fillStyle = "red";
         ctx.beginPath();
         ctx.moveTo(pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop());
-        ctx.lineTo(pointX-45+$("#main-screen").scrollLeft(), pointY-45);
-        ctx.lineTo(pointX+45+$("#main-screen").scrollLeft(), pointY-45);
+        ctx.lineTo(pointX-45+$("#main-screen").scrollLeft(), pointY-45+$("#main-screen").scrollTop());
+        ctx.lineTo(pointX+45+$("#main-screen").scrollLeft(), pointY-45+$("#main-screen").scrollTop());
         ctx.closePath();
         ctx.fill();
-        ctx.fillText(player, pointX-10, pointY-55);
+        ctx.fillText(player, pointX-10+$("#main-screen").scrollLeft(), pointY-55+$("#main-screen").scrollTop());
     }
 }
 function resetObjects(){
@@ -275,8 +275,6 @@ document.addEventListener('keyup', function(e){
 $("#countdown-bar").click(function(){
     var timerInterval = window.setInterval(timer, 10);
 });
-
-
 $("#zoom-in").click(function(){
     zoom+=15;
     zoomOutMax = false;
