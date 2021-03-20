@@ -61,8 +61,6 @@ function drawGrid(x, y) {
     $(".grid").width("70px");
     $(".grid").height("70px");
 };
-
-
 function timer(){
     var d = new Date();
     if(d.getTime()-n  > 65 && timerBar <90.5){
@@ -196,6 +194,13 @@ function drawFinalObject(n){
         ctx.fillText(player, pointX-10+$("#main-screen").scrollLeft(), pointY-55+$("#main-screen").scrollTop());
     }
 }
+function drawIncomingObject(n, player, startX, startY, pointX, pointY, distance, z){
+    if(n===1){
+        ctx.beginPath();
+        ctx.lineTo(pointX, pointY);
+        ctx.stroke();
+    }
+}
 function resetObjects(){
     for(var i = 0; i < 4; i++){
         drawnObjects[i] = false;
@@ -239,7 +244,35 @@ socket.on("S", function(msg){
 socket.on("D", function(msg){
     updateD(msg);
 });
-
+socket.on("line", function(msg){
+    if(msg[0] === player){
+    } else{
+        console.log(msg);
+        ctx.beginPath();
+        ctx.moveTo(msg[1], msg[2]);
+        ctx.lineTo(msg[3], msg[4]);
+        ctx.stroke();
+        ctx.fillText(msg[0] +" "+Math.round(msg[4]*500)/100, (msg[1]+msg[3])/2, (msg[2]+msg[4])/2);
+    }
+});
+socket.on("circle", function(msg){
+    if(msg[0] === player){
+    } else{
+        
+    }
+});
+socket.on("square", function(msg){
+    if(msg[0] === player){
+    } else{
+        
+    }
+});
+socket.on("ping", function(msg){
+    if(msg[0] === player){
+    } else{
+        
+    }
+});
 // Keylisteners for players
 document.addEventListener('keyup', function(e){
     if(e.code === 'KeyW'){
@@ -339,6 +372,7 @@ $("#main-screen").mousedown(function(e) {
     pointY = e.clientY;
     clicking = true;
     for(var i = 1; i < options.length-1; i++){
+        // Check if mouse clicked
         if(options[i] && !pointValue){
             pointValue = true;
             startPoint[0] = pointX+$("#main-screen").scrollLeft();
@@ -349,6 +383,13 @@ $("#main-screen").mousedown(function(e) {
             realPointY = pointY;
             realLeftScroll = leftScroll;
             realTopScroll = topScroll;
+            if(i===1){
+                socket.emit("line", [player, startPoint[0], startPoint[1], pointX+leftScroll, pointY+topScroll, distance, zoom]);
+            } else if(i===2){
+                socket.emit("circle", [player, startPoint[0], startPoint[1], distance*70*zoom/100.0, zoom]);
+            } else if(i===3){
+                socket.emit("square", [player, startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll, distance, zoom]);
+            } 
             drawFinalObject(i);
             drawnObjects[i] = true;
         } 
@@ -356,6 +397,7 @@ $("#main-screen").mousedown(function(e) {
     if(options[4]){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawFinalObject(4);
+        socket.emit("ping", [player, startPoint[0], startPoint[1], pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop(), zoom]);
     } 
 });
 $(document).mouseup(function() {
@@ -370,8 +412,6 @@ $("#main-screen").mousemove(function(e) {
         e.preventDefault(); // get mouse event
         $("#main-screen").scrollLeft(leftScroll + (pointX - e.clientX)); // scroll left for however much the difference between onclick and drag is 
         $("#main-screen").scrollTop(topScroll + (pointY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
-      //  $("#canvas").css("left", leftScroll + (pointX - e.clientX)); // scroll left for however much the difference between onclick and drag is 
-       // $("#canvas").css("top", topScroll + (pointY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
     } else if(options[1] && pointValue){ 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
