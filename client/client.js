@@ -7,10 +7,10 @@ $("#move").css("background-color", "grey");
 var zoom = 220;
 const mapLimits = [85, 85, 55]; 
 // move, line, circle, square, cone, ping
-var optionNames = ["#move", "#line", "#circle", "#square", "#cone", "#ping"];
-var options = [true, false, false, false, false, false];
+var optionNames = ["#move", "#line", "#circle", "#square", "#ping"];
+var options = [true, false, false, false, false];
             //move, line, circle, square, cone, ping
-var drawnObjects = [false, false, false, false, false];
+var drawnObjects = [false, false, false, false];
 var d = new Date();
 var n = d.getTime();
 var timerBar = 0;
@@ -131,6 +131,10 @@ function resetOptions(){
     }
 }
 function changeOption(n){
+    if(n ===0){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        resetObjects();
+    }
     if(options[n]){
         $(optionNames[n]).css("background-color", "white");
         options[n] = false;
@@ -180,25 +184,23 @@ function drawFinalObject(n){
         pointValue = false;
         ctx.rect(startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll);
         ctx.stroke();
+    } else if(n===4){
+        pointValue = false;
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.moveTo(pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop());
+        ctx.lineTo(pointX-45+$("#main-screen").scrollLeft(), pointY-45);
+        ctx.lineTo(pointX+45+$("#main-screen").scrollLeft(), pointY-45);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillText(player, pointX-10, pointY-55);
     }
 }
 function resetObjects(){
-    for(var i = 0; i < 5; i++){
+    for(var i = 0; i < 4; i++){
         drawnObjects[i] = false;
     }
 }
-//Main code to run for real
-/*
-var background = new Image();
-background.src = "/maps/map1.png";
-background.onload = function(){
-    ctx.drawImage(background, 0, 0)
-}
-*/
-/*
-var pic = document.getElementById("map");
-ctx.drawImage(pic,0, 0);
-*/
 if (player === players[0]){
 
 }
@@ -274,9 +276,7 @@ $("#countdown-bar").click(function(){
     var timerInterval = window.setInterval(timer, 10);
 });
 
-$("#move").click(function(){
-    changeOption(0);
-});
+
 $("#zoom-in").click(function(){
     zoom+=15;
     zoomOutMax = false;
@@ -292,8 +292,6 @@ $("#zoom-in").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-   // $("#canvas").css("zoom", zoom+"%");
-    //ctx.scale(zoom/100, zoom/100);
 });
 $("#zoom-out").click(function(){
     zoom-=15;
@@ -310,8 +308,9 @@ $("#zoom-out").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
-   // $("#canvas").css("zoom", zoom+"%");
-    //ctx.scale(zoom/100, zoom/100);
+});
+$("#move").click(function(){
+    changeOption(0);  
 });
 $("#line").click(function(){
     changeOption(1);
@@ -322,11 +321,8 @@ $("#circle").click(function(){
 $("#square").click(function(){
     changeOption(3);
 });
-$("#cone").click(function(){
-    changeOption(4);
-});
 $("#ping").click(function(){
-    changeOption(5);
+    changeOption(4);
 });
 $("#grid-toggle").click(function(){
     if(gridToggle){
@@ -344,13 +340,12 @@ $("#main-screen").mousedown(function(e) {
     pointX = e.clientX;
     pointY = e.clientY;
     clicking = true;
-    for(var i = 1; i < options.length; i++){
+    for(var i = 1; i < options.length-1; i++){
         if(options[i] && !pointValue){
             pointValue = true;
             startPoint[0] = pointX+$("#main-screen").scrollLeft();
             startPoint[1] = pointY+$("#main-screen").scrollTop();
             resetObjects();
-            console.log(startPoint[0], startPoint[1], pointX, pointY);
         } else if(options[i] && pointValue){
             realPointX = pointX;
             realPointY = pointY;
@@ -360,6 +355,10 @@ $("#main-screen").mousedown(function(e) {
             drawnObjects[i] = true;
         } 
     }
+    if(options[4]){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawFinalObject(4);
+    } 
 });
 $(document).mouseup(function() {
     clicking = false; // if mouse isn't clicked, not clicking
@@ -397,7 +396,7 @@ $("#main-screen").mousemove(function(e) {
         ctx.stroke();
         distance = calcDistance(0, e.clientX-startPoint[0]+leftScroll, 0, e.clientY-startPoint[1]+topScroll);
         ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX+leftScroll)/2, (startPoint[1]+e.clientY-20+topScroll)/2);
-    }
+    } 
     if (options[0] || pointValue || clicking){
         pointX = e.clientX; //update point x for smoother transition
         pointY = e.clientY; //update point y for smoother transition
