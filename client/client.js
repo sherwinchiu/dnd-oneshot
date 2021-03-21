@@ -20,6 +20,16 @@ const grid = 35;
 // Onclick listeners for the buttons
 const socket = io.connect();
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
+var playerSent = [false, false, false, false, false];
+// 2d array containing player names as the first element, then the elements of the object to draw
+var savedObjects = [
+    ["James", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"], //player 1 storage
+    ["Glen", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"], //player 2 storage
+    ["Nicolas", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"], //player 3 storage
+    ["Lilah", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"]  //player 4 storage
+    ["Sasha", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"]  //player 4 storage
+];
+
 var playerX = 0;
 var playerY = 0;
 var playerXs = [0, 0, 0, 0, 0, 0];
@@ -194,17 +204,25 @@ function drawFinalObject(n){
         ctx.fillText(player, pointX-10+$("#main-screen").scrollLeft(), pointY-55+$("#main-screen").scrollTop());
     }
 }
-function drawIncomingObject(n, player, startX, startY, pointX, pointY, distance, z){
-    if(n===1){
-        ctx.beginPath();
-        ctx.lineTo(pointX, pointY);
-        ctx.stroke();
-    }
-}
 function resetObjects(){
     for(var i = 0; i < 4; i++){
         drawnObjects[i] = false;
     }
+}
+function adjustZoom(){
+
+}
+function savePlayer(play, mouseX, mouseY, place1, place2, distance, zoom){
+    for(var i = 0; i < savedObjects; i++){
+        if(play === savedObjects[i][0])
+            savedObjects[i][1] = mouseX;
+            savedObjects[i][2] = mouseY;
+            savedObjects[i][3] = place1;
+            savedObjects[i][4] = place2; 
+            savedObjects[i][5] = distance; 
+            savedObjects[i][6] = zoom; 
+    }
+    
 }
 if (player === players[0]){
 
@@ -247,12 +265,18 @@ socket.on("D", function(msg){
 socket.on("line", function(msg){
     if(msg[0] === player){
     } else{
-        console.log(msg);
-        ctx.beginPath();
-        ctx.moveTo(msg[1], msg[2]);
-        ctx.lineTo(msg[3], msg[4]);
-        ctx.stroke();
-        ctx.fillText(msg[0] +" "+Math.round(msg[4]*500)/100, (msg[1]+msg[3])/2, (msg[2]+msg[4])/2);
+        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
+        for(var i = 0; i < playerSent.length; i++){
+            if(msg[0] === players[i+1] && !playerSent[i]){
+                playerSent[i] = true;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(msg[1], msg[2]);
+                ctx.lineTo(msg[3], msg[4]);
+                ctx.stroke();
+                ctx.fillText(msg[0] +" "+Math.round(msg[5]*500)/100, (msg[1]+msg[3])/2, (msg[2]+msg[4])/2-20);
+            } 
+        }
     }
 });
 socket.on("circle", function(msg){
@@ -399,6 +423,11 @@ $("#main-screen").mousedown(function(e) {
         drawFinalObject(4);
         socket.emit("ping", [player, startPoint[0], startPoint[1], pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop(), zoom]);
     } 
+    for(var i = 0; i < playerSent.length; i++){
+        if(playerSent[i]){
+            
+        }
+    }
 });
 $(document).mouseup(function() {
     clicking = false; // if mouse isn't clicked, not clicking
