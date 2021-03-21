@@ -23,11 +23,11 @@ var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
 var playerSent = [false, false, false, false, false];
 // 2d array containing player names as the first element, then the elements of the object to draw
 var savedObjects = [
-    ["James", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"], //player 1 storage
-    ["Glen", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"], //player 2 storage
-    ["Nicolas", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"], //player 3 storage
-    ["Lilah", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"]  //player 4 storage
-    ["Sasha", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom"]  //player 4 storage
+    ["James", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 1 storage
+    ["Glen", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 2 storage
+    ["Nicolas", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 3 storage
+    ["Lilah", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"],  //player 4 storage
+    ["Sasha", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"]  //player 4 storage
 ];
 
 var playerX = 0;
@@ -212,18 +212,20 @@ function resetObjects(){
 function adjustZoom(){
 
 }
-function savePlayer(play, mouseX, mouseY, place1, place2, distance, zoom){
-    for(var i = 0; i < savedObjects; i++){
-        if(play === savedObjects[i][0])
+function savePlayer(play, mouseX, mouseY, place1, place2, distance, zoom, type){
+    for(var i = 0; i < savedObjects.length; i++){
+        if(play === savedObjects[i][0]){
             savedObjects[i][1] = mouseX;
             savedObjects[i][2] = mouseY;
             savedObjects[i][3] = place1;
             savedObjects[i][4] = place2; 
             savedObjects[i][5] = distance; 
             savedObjects[i][6] = zoom; 
-    }
-    
+            savedObjects[i][7] = type;
+        }
+    }  
 }
+// Main function
 if (player === players[0]){
 
 }
@@ -265,7 +267,8 @@ socket.on("D", function(msg){
 socket.on("line", function(msg){
     if(msg[0] === player){
     } else{
-        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
+        console.log(msg);
+        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "line");
         for(var i = 0; i < playerSent.length; i++){
             if(msg[0] === players[i+1] && !playerSent[i]){
                 playerSent[i] = true;
@@ -422,12 +425,16 @@ $("#main-screen").mousedown(function(e) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawFinalObject(4);
         socket.emit("ping", [player, startPoint[0], startPoint[1], pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop(), zoom]);
-    } 
-    for(var i = 0; i < playerSent.length; i++){
-        if(playerSent[i]){
-            
-        }
     }
+    for(var i = 0; i < playerSent.length; i++){
+        if(playerSent[i] && savedObjects[i][7]){
+            ctx.beginPath();
+            ctx.moveTo(savedObjects[i][1], savedObjects[i][2]);
+            ctx.lineTo(savedObjects[i][3], savedObjects[i][4]);
+            ctx.stroke();
+            ctx.fillText(savedObjects[i][0] +" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3])/2, (savedObjects[i][2]+savedObjects[i][4])/2-20);
+        }
+    } 
 });
 $(document).mouseup(function() {
     clicking = false; // if mouse isn't clicked, not clicking
@@ -468,7 +475,6 @@ $("#main-screen").mousemove(function(e) {
         pointX = e.clientX; //update point x for smoother transition
         pointY = e.clientY; //update point y for smoother transition
     }
-    
 });
 $("#main-screen").mouseleave(function(e) {
     clicking = false; // if mouse isn't in screen, not clicking
