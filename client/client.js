@@ -8,13 +8,16 @@ var zoom = 100;
 const mapLimits = [85, 85, 55]; 
 // move, line, circle, rect, cone, ping
 var optionNames = ["#move", "#line", "#circle", "#rect", "#ping"];
+var monsterSelect = [false, false, false];
+var monsterX = [1260, 1330, 1400];
+var monsterY = [910, 980, 1050];
 var options = [true, false, false, false, false];
             //move, line, circle, rect, cone, ping
 var drawnObjects = [false, false, false, false, false, false];
 var d = new Date();
 var n = d.getTime();
 var timerBar = 0;
-var timerHeight = 90.6;
+const timerHeight = 90.6;
 var gridToggle = true;
 const grid = 35;
 // Onclick listeners for the buttons
@@ -47,6 +50,7 @@ var distance = 0;
 var adjustDistance = 0;
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
+var timerInterval = 0;
 
 var zoomOutMax = false;
 var zoomInMax = false;
@@ -72,16 +76,18 @@ function drawGrid(x, y) {
     $(".grid").width("70px");
     $(".grid").height("70px");
 };
-function timer(){
+function startTimer(){
     var d = new Date();
     if(d.getTime()-n  > 65 && timerBar <90.5){
         timerBar+=0.1;
         n = d.getTime();
         $("#countdown-bar").css("border-top-width", timerBar+"vh");
         $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
+        $("#countdown-bar").css("background-color", "rgb("+Math.round(timerBar*10)+","+Math.round(255-timerBar*2.5)+", 0)");
     }
-    if( timerBar< 90.5){
-        timerInterval = 0;
+    if( timerBar> 90.5){
+        timerBar = 0;
+        clearInterval(timerInterval);
     }
 }
 function updateW(player){
@@ -280,6 +286,9 @@ function savePlayer(play, mouseX, mouseY, place1, place2, distance, z, type){
 if (player === players[0]){
     $("#pfp").append("<button id=spawn>init</button>");
     $("#pfp").append("<button id=force>forcecam</button>");
+    $("#pfp").append("<button id=timer-start>start time</button>");
+    $("#pfp").append("<button id=timer-reset>reset time</button>");
+    $("#pfp").append("<button id=spawn-monsters>spawn monsters</button>");
 }
 $("#spawn").click(function(){
     socket.emit("updateX", [0,1680, 1680, 1820, 1820, 1750]);
@@ -288,6 +297,16 @@ $("#spawn").click(function(){
 $("#force").click(function(){
     socket.emit("forceCam", [leftScroll, topScroll, zoom]);
 });
+$("#timer-start").click(function(){
+    socket.emit("timer", "start");
+});
+$("#timer-reset").click(function(){
+    socket.emit("timer", "reset");
+});
+$("#spawn-monsters").click(function(){
+    socket.emit("spawn", ["monster1","monster2","monster3"]);
+});
+// end admin functions
 drawGrid(30, 30);
  // Server Connection Stuff
 socket.emit("player", player);
@@ -321,7 +340,25 @@ socket.on("forceCam", function(msg){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
+    $(".monster").css("zoom", zoom+"%");
 });
+socket.on("timer", function(msg){
+    if(msg === "start"){
+        timerInterval = setInterval(startTimer, 10);
+    } else if (msg === "reset"){
+        clearInterval(timerInterval);
+        timerBar = 0;
+        $("#countdown-bar").css("background-color", "rgb(0, 255, 0)");
+        $("#countdown-bar").css("border-top-width", timerBar+"vh");
+        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
+    }
+});
+socket.on("spawn", function(msg){
+    for(var i = 0; i < msg.length; i++){
+        $("#main-screen").append("<div class='monster' id='monster"+i+"' style='left:2070px; top:70px';><img src='/monsters/chuul.png'/></div>");
+
+    }
+})
 socket.on('player-online', function(msg) {
     $(".player-tab")[parseInt(msg)].style.backgroundColor = "green";
 });
@@ -404,36 +441,61 @@ socket.on("ping", function(msg){
 document.addEventListener('keyup', function(e){
     if(e.code === 'KeyW'){
         playerY-=grid;
-        if(playerY < 0){
+        if(player === player[0]){
+            for(var i = 0; i < monsterSelect.length; i++){
+                if(monsterSelect[i]){
+                    monsterY[i]-=grid;
+                    socket.emit("monsterY", -grid);
+                }
+            }
+        } else if(playerY < 0){
             playerY = 0;
         } else{
             socket.emit("W", player);
         }
     } else if(e.code ==='KeyA'){
         playerX-=grid;
-        if(playerX < 0){
+        if(player === player[0]){
+            for(var i = 0; i < monsterSelect.length; i++){
+                if(monsterSelect[i]){
+                    monsterX[i]-=grid;
+                    socket.emit("monsterX", -grid);
+                }
+            }
+        } else if(playerX < 0){
             playerX = 0;
         } else{
             socket.emit("A", player);
         }
     } else if(e.code ==='KeyS'){
         playerY+=grid;
-        if(playerY >= maxY){
+        if(player === player[0]){
+            for(var i = 0; i < monsterSelect.length; i++){
+                if(monsterSelect[i]){
+                    monsterY[i]+=grid;
+                    socket.emit("monsterY", grid);
+                }
+            }
+        }else if(playerY >= maxY){
             playerY -=grid;
         } else{
             socket.emit("S", player);
         }
     } else if(e.code ==='KeyD'){
         playerX+=grid;
-        if(playerX >= maxX[mapNum]){
+        if(player === player[0]){
+            for(var i = 0; i < monsterSelect.length; i++){
+                if(monsterSelect[i]){
+                    monsterX[i]+=grid;
+                    socket.emit("monsterX", grid);
+                }
+            }
+        }else if(playerX >= maxX[mapNum]){
             playerX -=grid;
         } else{
             socket.emit("D", player);
         }
     }
-});
-$("#countdown-bar").click(function(){
-    var timerInterval = window.setInterval(timer, 10);
 });
 $("#zoom-in").click(function(){
     zoom+=15;
@@ -455,6 +517,7 @@ $("#zoom-in").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
+    $(".monster").css("zoom", zoom+"%");
 });
 $("#zoom-out").click(function(){
     zoom-=15;
@@ -477,6 +540,7 @@ $("#zoom-out").click(function(){
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
+    $(".monster").css("zoom", zoom+"%");
 });
 $("#move").click(function(){
     changeOption(0);  

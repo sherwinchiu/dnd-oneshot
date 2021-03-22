@@ -25,6 +25,13 @@ html, body {
     top: 0px;
     left: 0px;
 }
+.monster{
+    border-radius:50%;
+    display:block;
+    position:absolute;
+    z-index: 54;
+    zoom: 100%
+}
 .option{
     display: block;
     float: left;

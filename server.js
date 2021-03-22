@@ -17,7 +17,7 @@ var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
 var playerXs = [0, 0, 0, 0, 0, 0];
 var playerYs = [0, 0, 0, 0, 0, 0];
 var online = [false, false, false, false, false, false];
-var points = [false, false];
+
 
 // Standard functions
 function moveW(player){
@@ -90,14 +90,23 @@ io.sockets.on('connection', function(socket){
         moveD(msg);
     });
     socket.on("updateX", function(msg){
+        playerXs = msg;
         io.emit('updateX', msg);
     });
     socket.on("updateY", function(msg){
+        playerYs = msg;
         io.emit('updateY', msg);
     });
     socket.on("forceCam", function(msg){
         io.emit("forceCam", msg);
     });
+    socket.on("timer", function(msg){
+        io.emit("timer", msg);
+    });
+    socket.on("spawn", function(msg){
+        io.emit("spawn", msg);
+    });
+
     // Events for player lines
     socket.on("line", function(msg){ // [name, point1, point2, point3, point4, zoom]
         io.emit("line", msg);
