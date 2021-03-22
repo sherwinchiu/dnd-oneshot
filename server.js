@@ -12,7 +12,7 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-
+const grid = 35;
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
 var playerXs = [0, 0, 0, 0, 0, 0];
 var playerYs = [0, 0, 0, 0, 0, 0];
@@ -23,7 +23,7 @@ var points = [false, false];
 function moveW(player){
     for(var i = 0; i < players.length; i++){
         if(player === players[i]){
-            playerYs[i]-=70;
+            playerYs[i]-=grid;
             io.emit("W", players[i]);
         }
     }
@@ -31,7 +31,7 @@ function moveW(player){
 function moveA(player){
     for(var i = 0; i < players.length; i++){
         if(player === players[i]){
-            playerXs[i]-=70;
+            playerXs[i]-=grid;
             io.emit("A", players[i]);
         }
     }
@@ -39,7 +39,7 @@ function moveA(player){
 function moveS(player){
     for(var i = 0; i < players.length; i++){
         if(player === players[i]){
-            playerYs[i]+=70;
+            playerYs[i]+=grid;
             io.emit("S", players[i]);
         }
     }
@@ -47,7 +47,7 @@ function moveS(player){
 function moveD(player){
     for(var i = 0; i < players.length; i++){
         if(player === players[i]){
-            playerXs[i]+=70;
+            playerXs[i]+=grid;
             io.emit("D", players[i]);
         }
     }
@@ -62,6 +62,7 @@ console.log("Server started on port "+port);
 io.sockets.on('connection', function(socket){
     console.log("user connected");
     //Check if users is connected or not
+    console.log(playerXs, playerYs);
     io.emit("hello");
     io.emit("positionX", playerXs);
     io.emit("positionY", playerYs);
@@ -96,8 +97,8 @@ io.sockets.on('connection', function(socket){
     socket.on("circle", function(msg){ // [name, point1, point2, radius, zoom]
         io.emit("circle", msg);
     });
-    socket.on("square", function(msg){ // [name, point1, point2, width, radius, zoom]
-        io.emit("square", msg);
+    socket.on("rect", function(msg){ // [name, point1, point2, width, radius, zoom]
+        io.emit("rect", msg);
     });
     socket.on("ping", function(msg){ // [name, point1, point2, zoom]
         io.emit("ping", msg);

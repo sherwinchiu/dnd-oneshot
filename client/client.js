@@ -4,13 +4,13 @@
 // Scroll Variables
 var clicking = false;
 $("#move").css("background-color", "grey");
-var zoom = 220;
+var zoom = 100;
 const mapLimits = [85, 85, 55]; 
-// move, line, circle, square, cone, ping
-var optionNames = ["#move", "#line", "#circle", "#square", "#ping"];
+// move, line, circle, rect, cone, ping
+var optionNames = ["#move", "#line", "#circle", "#rect", "#ping"];
 var options = [true, false, false, false, false];
-            //move, line, circle, square, cone, ping
-var drawnObjects = [false, false, false, false];
+            //move, line, circle, rect, cone, ping
+var drawnObjects = [false, false, false, false, false, false];
 var d = new Date();
 var n = d.getTime();
 var timerBar = 0;
@@ -20,7 +20,7 @@ const grid = 35;
 // Onclick listeners for the buttons
 const socket = io.connect();
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
-var playerSent = [false, false, false, false, false];
+var playerSent = [false, false, false, false, false, false];
 // 2d array containing player names as the first element, then the elements of the object to draw
 var savedObjects = [
     ["Sherwin", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 1 storage
@@ -127,7 +127,7 @@ function updatePlayers(){
 }
 function localUpdate(){
     for(var i = 0; i < players.length; i++){
-        if (player == players[i]){
+        if (player === players[i]){
             playerX = playerXs[i];
             playerY = playerYs[i];
         }
@@ -172,13 +172,24 @@ function adjustObject(n, i){
     if(i===1){
         ctx.moveTo(startPoint[0], startPoint[1]);
         ctx.lineTo(realPointX+realLeftScroll, realPointY+realTopScroll);
+        ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
     } else if(i===2){
         ctx.arc(startPoint[0], startPoint[1], (distance*70*zoom/100.0)/(zoom+n)*zoom,0, 2*Math.PI);
+        ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
     } else if(i===3){
         ctx.rect(startPoint[0], startPoint[1], realPointX+realLeftScroll-startPoint[0], realPointY+realTopScroll-startPoint[1]);
+        ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
+    } else if(i===4){
+        ctx.fillStyle = "red";
+        ctx.moveTo(startPoint[0], startPoint[1]);
+        ctx.lineTo(startPoint[0]-45, startPoint[1]-45);
+        ctx.lineTo(startPoint[0]+45, startPoint[1]-45);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillText(player, startPoint[0]-10, startPoint[1]-55);
     }
     ctx.stroke();
-    ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
+    
 }
 function adjustOutterObjects(n){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -195,11 +206,26 @@ function adjustOutterObjects(n){
             ctx.lineTo(savedObjects[i][3], savedObjects[i][4]);
             ctx.stroke();
             ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3])/2, (savedObjects[i][2]+savedObjects[i][4])/2);
-        } if(playerSent[i] && savedObjects[i][7] === "circle"){
+        } else if(playerSent[i] && savedObjects[i][7] === "circle"){
             ctx.beginPath();
             ctx.arc(savedObjects[i][1], savedObjects[i][2], savedObjects[i][5]*(70*zoom/100.0)/(zoom+n)*zoom, 0, 2*Math.PI);
             ctx.stroke();
             ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3]), (savedObjects[i][2]+savedObjects[i][4]));
+        } else if(playerSent[i] && savedObjects[i][7] === "rect"){
+            ctx.beginPath();
+            ctx.rect(savedObjects[i][1],savedObjects[i][2],savedObjects[i][3],savedObjects[i][4]);
+            ctx.stroke();
+            ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3]), (savedObjects[i][2]+savedObjects[i][4]));
+        } else if(playerSent[i] && savedObjects[i][7] === "ping"){
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.moveTo(savedObjects[i][3], savedObjects[i][4]);
+            ctx.lineTo(savedObjects[i][3]-45, savedObjects[i][4]);
+            ctx.lineTo(savedObjects[i][3]*+45, savedObjects[i][4]-45);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillText(savedObjects[i][0], savedObjects[i][3]-10, savedObjects[i][4]-55);
         }
     }
 }
@@ -225,6 +251,7 @@ function drawFinalObject(n){
         ctx.lineTo(pointX+45+$("#main-screen").scrollLeft(), pointY-45+$("#main-screen").scrollTop());
         ctx.closePath();
         ctx.fill();
+        ctx.stroke();
         ctx.fillText(player, pointX-10+$("#main-screen").scrollLeft(), pointY-55+$("#main-screen").scrollTop());
     }
 }
@@ -318,12 +345,12 @@ socket.on("circle", function(msg){
         ctx.fillText(msg[0] +" "+Math.round(msg[3]*500)/100, msg[1]*(zoom/msg[4]), msg[2]*(zoom/msg[4])-20);
     }
 });
-socket.on("square", function(msg){
+socket.on("rect", function(msg){
     if(msg[0] === player){
     } else{
         resetObjects();
         resetPlayerSent();
-        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "square");
+        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "rect");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
         ctx.rect(msg[1]*(zoom/msg[6]),msg[2]*(zoom/msg[6]),msg[3]*(zoom/msg[6]),msg[4]*(zoom/msg[6]));
@@ -334,9 +361,19 @@ socket.on("square", function(msg){
 socket.on("ping", function(msg){
     if(msg[0] === player){
     } else{
-        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "ping");
         resetObjects();
         resetPlayerSent();
+        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "ping");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.moveTo(msg[3]*(zoom/msg[5]), msg[4]*(zoom/msg[5]));
+        ctx.lineTo(msg[3]*(zoom/msg[5])-45, msg[4]*(zoom/msg[5])-45);
+        ctx.lineTo(msg[3]*(zoom/msg[5])+45, msg[4]*(zoom/msg[5])-45);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillText(msg[0], msg[3]*(zoom/msg[5])-10, msg[4]*(zoom/msg[5])-55);
     }
 });
 // Keylisteners for players
@@ -381,10 +418,13 @@ $("#zoom-in").click(function(){
         zoom= 220;
         zoomInMax = true;
     } 
-    for(var i = 1; i < options.length; i++){
+    for(var i = 0; i < options.length; i++){
         if(drawnObjects[i] && (!zoomInMax)){
             adjustObject(-15, i);
-        } else if (playerSent[i] && (!zoomInMax)){
+        }
+    } 
+    for(var i = 0; i < playerSent.length; i++){
+        if (playerSent[i] && (!zoomInMax)){
             adjustOutterObjects(-15);
         }
     }
@@ -399,11 +439,14 @@ $("#zoom-out").click(function(){
         zoom =100;
         zoomOutMax = true;
     } 
+    
     for(var i = 0; i < options.length; i++){
         if(drawnObjects[i] &&!zoomOutMax){
             adjustObject(15, i);
-            
-        }else if (playerSent[i] && (!zoomOutMax)){
+        }
+    }
+    for(var i = 0; i < playerSent.length; i++){
+        if (playerSent[i] && (!zoomOutMax)){
             adjustOutterObjects(15);
         }
     }
@@ -413,6 +456,8 @@ $("#zoom-out").click(function(){
 });
 $("#move").click(function(){
     changeOption(0);  
+    resetObjects();
+    resetPlayerSent();
 });
 $("#line").click(function(){
     changeOption(1);
@@ -420,7 +465,7 @@ $("#line").click(function(){
 $("#circle").click(function(){
     changeOption(2);
 });
-$("#square").click(function(){
+$("#rect").click(function(){
     changeOption(3);
 });
 $("#ping").click(function(){
@@ -460,7 +505,7 @@ $("#main-screen").mousedown(function(e) {
             } else if(i===2){
                 socket.emit("circle", [player, startPoint[0], startPoint[1], distance, zoom, 1, 2]);
             } else if(i===3){
-                socket.emit("square", [player, startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll, distance, zoom]);
+                socket.emit("rect", [player, startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll, distance, zoom]);
             } 
             drawFinalObject(i);
             drawnObjects[i] = true;
@@ -469,7 +514,10 @@ $("#main-screen").mousedown(function(e) {
     if(options[4]){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawFinalObject(4);
-        socket.emit("ping", [player, startPoint[0], startPoint[1], pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop(), zoom]);
+        drawnObjects[4] = true;
+        socket.emit("ping", [player, startPoint[0], startPoint[1], pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop(), zoom, 0]);
+        startPoint[0] = pointX+$("#main-screen").scrollLeft();
+        startPoint[1] = pointY+$("#main-screen").scrollTop();
     }
 });
 $(document).mouseup(function() {
