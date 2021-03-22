@@ -84,9 +84,6 @@ function timer(){
         timerInterval = 0;
     }
 }
-function updater(){
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
 function updateW(player){
     for(var i = 0; i < players.length; i++){
         if(player === players[i]){
@@ -279,10 +276,18 @@ function savePlayer(play, mouseX, mouseY, place1, place2, distance, z, type){
         }
     }  
 }
-// Main function
+// Main Admin function
 if (player === players[0]){
-
+    $("#pfp").append("<button id=spawn>init</button>");
+    $("#pfp").append("<button id=force>forcecam</button>");
 }
+$("#spawn").click(function(){
+    socket.emit("updateX", [0,1680, 1680, 1820, 1820, 1750]);
+    socket.emit("updateY", [0,1960, 2030, 1960, 2030, 1890]);
+});
+$("#force").click(function(){
+    socket.emit("forceCam", [leftScroll, topScroll, zoom]);
+});
 drawGrid(30, 30);
  // Server Connection Stuff
 socket.emit("player", player);
@@ -298,6 +303,24 @@ socket.on("positionY", function(Y){
     playerYs = Y;
     localUpdate();
     updatePlayers();
+});
+socket.on("updateX", function(msg){
+    playerXs = msg;
+    localUpdate();
+    updatePlayers();
+});
+socket.on("updateY", function(msg){
+    playerYs = msg;
+    localUpdate();
+    updatePlayers();
+});
+socket.on("forceCam", function(msg){
+    zoom = msg[2];
+    $("#main-screen").scrollLeft(msg[0]); // scroll left for however much the difference between onclick and drag is 
+    $("#main-screen").scrollTop(msg[1]); // scroll top for however much the difference between onclick and drag is 
+    $("#map").css("zoom", zoom+"%");
+    $(".grid").css("zoom", zoom+"%");
+    $(".player").css("zoom", zoom+"%");
 });
 socket.on('player-online', function(msg) {
     $(".player-tab")[parseInt(msg)].style.backgroundColor = "green";
@@ -318,6 +341,7 @@ socket.on("S", function(msg){
 socket.on("D", function(msg){
     updateD(msg);
 });
+
 socket.on("line", function(msg){
     if(msg[0] === player){
     } else{

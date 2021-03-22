@@ -62,7 +62,6 @@ console.log("Server started on port "+port);
 io.sockets.on('connection', function(socket){
     console.log("user connected");
     //Check if users is connected or not
-    console.log(playerXs, playerYs);
     io.emit("hello");
     io.emit("positionX", playerXs);
     io.emit("positionY", playerYs);
@@ -89,6 +88,15 @@ io.sockets.on('connection', function(socket){
     });
     socket.on("D", function(msg){
         moveD(msg);
+    });
+    socket.on("updateX", function(msg){
+        io.emit('updateX', msg);
+    });
+    socket.on("updateY", function(msg){
+        io.emit('updateY', msg);
+    });
+    socket.on("forceCam", function(msg){
+        io.emit("forceCam", msg);
     });
     // Events for player lines
     socket.on("line", function(msg){ // [name, point1, point2, point3, point4, zoom]
