@@ -23,6 +23,7 @@ var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
 var playerSent = [false, false, false, false, false];
 // 2d array containing player names as the first element, then the elements of the object to draw
 var savedObjects = [
+    ["Sherwin", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 1 storage
     ["James", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 1 storage
     ["Glen", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 2 storage
     ["Nicolas", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"], //player 3 storage
@@ -57,7 +58,7 @@ var realPointY = 0;
 var realLeftScroll = 0;
 var realTopScroll = 0;
 ctx.lineWidth = 5;
-ctx.font="14px verdana";
+ctx.font="bold 14px verdana";
 ctx.fillStyle = "red";
 // Main code to run instantly
 
@@ -181,7 +182,7 @@ function adjustObject(n, i){
 }
 function adjustOutterObjects(n){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for(var i = 0; i < 4; i++){
+    for(var i = 0; i < savedObjects.length; i++){
         if(playerSent[i]){
             savedObjects[i][1]=savedObjects[i][1]/(zoom+n)*zoom;
             savedObjects[i][2]=savedObjects[i][2]/(zoom+n)*zoom;
@@ -194,6 +195,11 @@ function adjustOutterObjects(n){
             ctx.lineTo(savedObjects[i][3], savedObjects[i][4]);
             ctx.stroke();
             ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3])/2, (savedObjects[i][2]+savedObjects[i][4])/2);
+        } if(playerSent[i] && savedObjects[i][7] === "circle"){
+            ctx.beginPath();
+            ctx.arc(savedObjects[i][1], savedObjects[i][2], savedObjects[i][5]*(70*zoom/100.0)/(zoom+n)*zoom, 0, 2*Math.PI);
+            ctx.stroke();
+            ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3]), (savedObjects[i][2]+savedObjects[i][4]));
         }
     }
 }
@@ -223,7 +229,7 @@ function drawFinalObject(n){
     }
 }
 function resetObjects(){
-    for(var i = 0; i < 4; i++){
+    for(var i = 0; i < drawnObjects.length; i++){
         drawnObjects[i] = false;
     }
 }
@@ -288,9 +294,9 @@ socket.on("D", function(msg){
 socket.on("line", function(msg){
     if(msg[0] === player){
     } else{
+        resetObjects();
         resetPlayerSent();
         savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "line");
-        resetObjects();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath();
         ctx.moveTo(msg[1]*(zoom/msg[6]), msg[2]*(zoom/msg[6]));
@@ -302,17 +308,27 @@ socket.on("line", function(msg){
 socket.on("circle", function(msg){
     if(msg[0] === player){
     } else{
-        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "circle");
         resetObjects();
         resetPlayerSent();
+        savePlayer(msg[0], msg[1], msg[2], 0, 0, msg[3], msg[4], "circle");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.arc(msg[1]*(zoom/msg[4]), msg[2]*(zoom/msg[4]), msg[3]*70*msg[4]/100.0*(zoom/msg[4]), 0, 2*Math.PI);
+        ctx.stroke();
+        ctx.fillText(msg[0] +" "+Math.round(msg[3]*500)/100, msg[1]*(zoom/msg[4]), msg[2]*(zoom/msg[4])-20);
     }
 });
 socket.on("square", function(msg){
     if(msg[0] === player){
     } else{
-        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "square");
         resetObjects();
         resetPlayerSent();
+        savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "square");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.rect(msg[1]*(zoom/msg[6]),msg[2]*(zoom/msg[6]),msg[3]*(zoom/msg[6]),msg[4]*(zoom/msg[6]));
+        ctx.stroke();
+        ctx.fillText(msg[0] +" "+Math.round(msg[5]*500)/100, (msg[1]*(zoom/msg[6])+msg[3]*(zoom/msg[6]))-200, (msg[2]*(zoom/msg[6])+msg[4]*(zoom/msg[6]))-200);
     }
 });
 socket.on("ping", function(msg){
@@ -383,7 +399,7 @@ $("#zoom-out").click(function(){
         zoom =100;
         zoomOutMax = true;
     } 
-    for(var i = 1; i < options.length; i++){
+    for(var i = 0; i < options.length; i++){
         if(drawnObjects[i] &&!zoomOutMax){
             adjustObject(15, i);
             
@@ -442,7 +458,7 @@ $("#main-screen").mousedown(function(e) {
             if(i===1){
                 socket.emit("line", [player, startPoint[0], startPoint[1], pointX+leftScroll, pointY+topScroll, distance, zoom]);
             } else if(i===2){
-                socket.emit("circle", [player, startPoint[0], startPoint[1], distance*70*zoom/100.0, zoom]);
+                socket.emit("circle", [player, startPoint[0], startPoint[1], distance, zoom, 1, 2]);
             } else if(i===3){
                 socket.emit("square", [player, startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll, distance, zoom]);
             } 

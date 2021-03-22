@@ -1,4 +1,4 @@
-const port = 25565;
+const port = 80;
 const { Console } = require("console");
 
 var jsdom = require("jsdom");
