@@ -18,7 +18,7 @@ var d = new Date();
 var n = d.getTime();
 var timerBar = 0;
 const timerHeight = 90.6;
-var gridToggle = true;
+var gridToggle = false;
 const grid = 35;
 // Onclick listeners for the buttons
 const socket = io.connect();
@@ -126,6 +126,12 @@ function updatePlayers(){
     for(var i = 0; i < players.length; i++){
         $("#"+players[i]).css("left", playerXs[i]);
         $("#"+players[i]).css("top", playerYs[i]);
+    }
+}
+function updateMonsters(){
+    for(var i = 0; i < monsterSelect.length; i++){
+        $("#monster"+i).css("left", monsterX[i]);
+        $("#monster"+i).css("top", monsterY[i]);
     }
 }
 function localUpdate(){
@@ -289,6 +295,15 @@ if (player === players[0]){
     $("#pfp").append("<button id=timer-start>start time</button>");
     $("#pfp").append("<button id=timer-reset>reset time</button>");
     $("#pfp").append("<button id=spawn-monsters>spawn monsters</button>");
+    $("#pfp").append("<button id=move1>move1</button>");
+    $("#pfp").append("<button id=move2>move2</button>");
+    $("#pfp").append("<button id=move3>move3</button>");
+    $("#pfp").append("<button id=change1>james</button>");
+    $("#pfp").append("<button id=change2>glen</button>");
+    $("#pfp").append("<button id=change3>nicolas</button>");
+    $("#pfp").append("<button id=change4>lilah</button>");
+    $("#pfp").append("<button id=change5>sasha</button>");
+    $("#pfp").append("<button id=change6>enemy</button>");
 }
 $("#spawn").click(function(){
     socket.emit("updateX", [0,1680, 1680, 1820, 1820, 1750]);
@@ -305,6 +320,36 @@ $("#timer-reset").click(function(){
 });
 $("#spawn-monsters").click(function(){
     socket.emit("spawn", ["monster1","monster2","monster3"]);
+});
+$("#move1").click(function(){
+    monsterSelect = [true, false, false];
+});
+$("#move2").click(function(){
+    monsterSelect = [false, true, false];
+});
+$("#move3").click(function(){
+    monsterSelect = [false, false, true];
+});
+$("#change1").click(function(){
+    socket.emit("change", 0);
+});
+$("#change2").click(function(){
+    socket.emit("change", 1);
+});
+$("#change3").click(function(){
+    socket.emit("change", 2);
+});
+$("#change4").click(function(){
+    socket.emit("change", 3);
+});
+$("#change4").click(function(){
+    socket.emit("change", 4);
+});
+$("#change5").click(function(){
+    socket.emit("change", 5);
+});
+$("#change6").click(function(){
+    socket.emit("change", 6);
 });
 // end admin functions
 drawGrid(30, 30);
@@ -356,9 +401,27 @@ socket.on("timer", function(msg){
 socket.on("spawn", function(msg){
     for(var i = 0; i < msg.length; i++){
         $("#main-screen").append("<div class='monster' id='monster"+i+"' style='left:2070px; top:70px';><img src='/monsters/chuul.png'/></div>");
-
     }
 })
+socket.on("monsterX", function(msg){
+    monsterX = msg;
+    updateMonsters();
+});
+socket.on("monsterY", function(msg){
+    monsterY = msg;
+    updateMonsters();
+});
+socket.on("change", function(msg){
+    $(".pfp-display").remove();
+    for(var i = 0; i < players.length+1; i++){
+        if (msg === players[i]){
+            $("#pfp").append("<img class='pfp-display' src='/players/player"+(i+1)+".png'/>");
+        }
+    } 
+    if (msg === "monster"){
+        $("#pfp").append("<img class='pfp-display'src='/monsters/chuul.png'/>");
+    }
+});
 socket.on('player-online', function(msg) {
     $(".player-tab")[parseInt(msg)].style.backgroundColor = "green";
 });
@@ -378,7 +441,6 @@ socket.on("S", function(msg){
 socket.on("D", function(msg){
     updateD(msg);
 });
-
 socket.on("line", function(msg){
     if(msg[0] === player){
     } else{
@@ -441,11 +503,11 @@ socket.on("ping", function(msg){
 document.addEventListener('keyup', function(e){
     if(e.code === 'KeyW'){
         playerY-=grid;
-        if(player === player[0]){
+        if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
                     monsterY[i]-=grid;
-                    socket.emit("monsterY", -grid);
+                    socket.emit("monsterY", monsterY);
                 }
             }
         } else if(playerY < 0){
@@ -455,11 +517,11 @@ document.addEventListener('keyup', function(e){
         }
     } else if(e.code ==='KeyA'){
         playerX-=grid;
-        if(player === player[0]){
+        if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
                     monsterX[i]-=grid;
-                    socket.emit("monsterX", -grid);
+                    socket.emit("monsterX", monsterX);
                 }
             }
         } else if(playerX < 0){
@@ -469,11 +531,11 @@ document.addEventListener('keyup', function(e){
         }
     } else if(e.code ==='KeyS'){
         playerY+=grid;
-        if(player === player[0]){
+        if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
                     monsterY[i]+=grid;
-                    socket.emit("monsterY", grid);
+                    socket.emit("monsterY", monsterY);
                 }
             }
         }else if(playerY >= maxY){
@@ -483,11 +545,11 @@ document.addEventListener('keyup', function(e){
         }
     } else if(e.code ==='KeyD'){
         playerX+=grid;
-        if(player === player[0]){
+        if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
                     monsterX[i]+=grid;
-                    socket.emit("monsterX", grid);
+                    socket.emit("monsterX", monsterX);
                 }
             }
         }else if(playerX >= maxX[mapNum]){

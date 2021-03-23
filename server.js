@@ -17,7 +17,8 @@ var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
 var playerXs = [0, 0, 0, 0, 0, 0];
 var playerYs = [0, 0, 0, 0, 0, 0];
 var online = [false, false, false, false, false, false];
-
+var monsterX = [0, 0, 0];
+var monsterY = [0, 0, 0];
 
 // Standard functions
 function moveW(player){
@@ -106,7 +107,24 @@ io.sockets.on('connection', function(socket){
     socket.on("spawn", function(msg){
         io.emit("spawn", msg);
     });
-
+    socket.on("monsterX", function(msg){
+        monsterX = msg;
+        io.emit("monsterX", monsterX);
+    });
+    socket.on("monsterY", function(msg){
+        monsterY = msg;
+        io.emit("monsterY", monsterY);
+    });
+    socket.on("change", function(msg){
+        for(var i = 0; i < players.length; i++){
+            if (msg === i){
+                io.emit("change", players[i])
+            }
+        }
+        if (msg === 6){
+            io.emit("change", "monster");
+        }
+    });
     // Events for player lines
     socket.on("line", function(msg){ // [name, point1, point2, point3, point4, zoom]
         io.emit("line", msg);
