@@ -312,12 +312,14 @@ $("#spawn").click(function(){
 $("#force").click(function(){
     socket.emit("forceCam", [leftScroll, topScroll, zoom]);
 });
+/*
 $("#timer-start").click(function(){
     socket.emit("timer", "start");
 });
 $("#timer-reset").click(function(){
     socket.emit("timer", "reset");
 });
+*/
 $("#spawn-monsters").click(function(){
     socket.emit("spawn", ["monster1","monster2","monster3"]);
 });
@@ -387,6 +389,7 @@ socket.on("forceCam", function(msg){
     $(".player").css("zoom", zoom+"%");
     $(".monster").css("zoom", zoom+"%");
 });
+/*
 socket.on("timer", function(msg){
     if(msg === "start"){
         timerInterval = setInterval(startTimer, 10);
@@ -398,6 +401,7 @@ socket.on("timer", function(msg){
         $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
     }
 });
+*/
 socket.on("spawn", function(msg){
     for(var i = 0; i < msg.length; i++){
         $("#main-screen").append("<div class='monster' id='monster"+i+"' style='left:2070px; top:70px';><img src='/monsters/chuul.png'/></div>");

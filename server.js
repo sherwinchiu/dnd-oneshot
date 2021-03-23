@@ -101,9 +101,11 @@ io.sockets.on('connection', function(socket){
     socket.on("forceCam", function(msg){
         io.emit("forceCam", msg);
     });
+    /*
     socket.on("timer", function(msg){
         io.emit("timer", msg);
     });
+    */
     socket.on("spawn", function(msg){
         io.emit("spawn", msg);
     });
