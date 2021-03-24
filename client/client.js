@@ -66,7 +66,9 @@ ctx.font="bold 14px verdana";
 ctx.fillStyle = "red";
 // Main code to run instantly
 
-// Function functions
+ /*********************************************************************
+  *                  Basics Functions 
+  *********************************************************************/
 function drawGrid(x, y) {
     for (var rows = 0; rows < y; rows++) {
         for (var columns = 0; columns < x; columns++) {
@@ -76,20 +78,7 @@ function drawGrid(x, y) {
     $(".grid").width("70px");
     $(".grid").height("70px");
 };
-function startTimer(){
-    var d = new Date();
-    if(d.getTime()-n  > 65 && timerBar <90.5){
-        timerBar+=0.1;
-        n = d.getTime();
-        $("#countdown-bar").css("border-top-width", timerBar+"vh");
-        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
-        $("#countdown-bar").css("background-color", "rgb("+Math.round(timerBar*10)+","+Math.round(255-timerBar*2.5)+", 0)");
-    }
-    if( timerBar> 90.5){
-        timerBar = 0;
-        clearInterval(timerInterval);
-    }
-}
+
 function updateW(player){
     for(var i = 0; i < players.length; i++){
         if(player === players[i]){
@@ -159,11 +148,7 @@ function changeOption(n){
     }
 }
 function calcDistance(x1, x2, y1, y2){
-    x1/=70.0;
-    x2/=70.0;
-    y1/=70.0;
-    y2/=70.0;
-    return Math.round(Math.sqrt(Math.pow((x2-x1), 2) + Math.pow((y2-y1), 2))*100/(zoom/100.0))/100.0;
+    return Math.round(Math.sqrt(Math.pow((x2/70-x1/70), 2) + Math.pow((y2/70-y1/70), 2))*100/(zoom/100.0))/100.0;
 }
 function drawLine(p, x1, y1, x2, y2, d){
     ctx.beginPath();
@@ -257,7 +242,9 @@ function savePlayer(play, mouseX, mouseY, place1, place2, distance, z, type){
         }
     }  
 }
-// Main Admin function
+ /*********************************************************************************************
+  *                  Admin Onclick Listeners
+  *********************************************************************************************/
 if (player === players[0]){
     $("#pfp").append("<button id=spawn>init</button>");
     $("#pfp").append("<button id=force>forcecam</button>");
@@ -274,9 +261,6 @@ if (player === players[0]){
     $("#pfp").append("<button id=change5>sasha</button>");
     $("#pfp").append("<button id=change6>enemy</button>");
 }
- /**************************************************************
-  *                  Admin Onclick Listeners
-  **************************************************************/
 $("#spawn").click(function(){
     socket.emit("updateX", [0,1680, 1680, 1820, 1820, 1750]);
     socket.emit("updateY", [0,1960, 2030, 1960, 2030, 1890]);
@@ -284,14 +268,6 @@ $("#spawn").click(function(){
 $("#force").click(function(){
     socket.emit("forceCam", [leftScroll, topScroll, zoom]);
 });
-/*
-$("#timer-start").click(function(){
-    socket.emit("timer", "start");
-});
-$("#timer-reset").click(function(){
-    socket.emit("timer", "reset");
-});
-*/
 $("#spawn-monsters").click(function(){
     socket.emit("spawn", ["monster1","monster2","monster3"]);
 });
@@ -327,9 +303,9 @@ $("#change6").click(function(){
 });
 // end admin functions
 drawGrid(30, 30);
- /**************************************************************
+ /*******************************************************************
   *                  Client Side Listeners
-  **************************************************************/
+  *******************************************************************/
 socket.emit("player", player);
 socket.on("hello", function(){
     socket.emit("hi", player);
@@ -352,26 +328,13 @@ socket.on("updateY", function(msg){
 });
 socket.on("forceCam", function(msg){
     zoom = msg[2];
-    $("#main-screen").scrollLeft(msg[0]); // scroll left for however much the difference between onclick and drag is 
-    $("#main-screen").scrollTop(msg[1]); // scroll top for however much the difference between onclick and drag is 
+    $("#main-screen").scrollLeft(msg[0]); 
+    $("#main-screen").scrollTop(msg[1]); 
     $("#map").css("zoom", zoom+"%");
     $(".grid").css("zoom", zoom+"%");
     $(".player").css("zoom", zoom+"%");
     $(".monster").css("zoom", zoom+"%");
 });
-/*
-socket.on("timer", function(msg){
-    if(msg === "start"){
-        timerInterval = setInterval(startTimer, 10);
-    } else if (msg === "reset"){
-        clearInterval(timerInterval);
-        timerBar = 0;
-        $("#countdown-bar").css("background-color", "rgb(0, 255, 0)");
-        $("#countdown-bar").css("border-top-width", timerBar+"vh");
-        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
-    }
-});
-*/
 socket.on("spawn", function(msg){
     for(var i = 0; i < msg.length; i++){
         $("#main-screen").append("<div class='monster' id='monster"+i+"' style='left:2070px; top:70px';><img src='/monsters/chuul.png'/></div>");
@@ -454,7 +417,9 @@ socket.on("ping", function(msg){
         drawPing(msg[0], msg[3]*(zoom/msg[5]), msg[4]*(zoom/msg[5]));
     }
 });
-// Keylisteners for players
+/************************************************************************
+ *                 Mouse Options Click Functions
+ ************************************************************************/
 document.addEventListener('keyup', function(e){
     if(e.code === 'KeyW'){
         playerY-=grid;
@@ -514,6 +479,9 @@ document.addEventListener('keyup', function(e){
         }
     }
 });
+/************************************************************************
+ *                 Mouse Options Click Functions
+ ************************************************************************/
 $("#zoom-in").click(function(){
     zoom+=15;
     zoomOutMax = false;
@@ -584,7 +552,9 @@ $("#grid-toggle").click(function(){
         $(".grid").css("display", "block");
     }
 })
-// Scroll Controls (will probably have to implement other controlls in here as well)
+/************************************************************************
+ *            Mouse Movement and Press Functions
+ ************************************************************************/
 $("#main-screen").mousedown(function(e) {
     e.preventDefault(); // mouse event
     pointX = e.clientX;
@@ -654,3 +624,40 @@ $("#main-screen").mousemove(function(e) {
 $("#main-screen").mouseleave(function(e) {
     clicking = false; // if mouse isn't in screen, not clicking
 });
+/*
+function startTimer(){
+    var d = new Date();
+    if(d.getTime()-n  > 65 && timerBar <90.5){
+        timerBar+=0.1;
+        n = d.getTime();
+        $("#countdown-bar").css("border-top-width", timerBar+"vh");
+        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
+        $("#countdown-bar").css("background-color", "rgb("+Math.round(timerBar*10)+","+Math.round(255-timerBar*2.5)+", 0)");
+    }
+    if( timerBar> 90.5){
+        timerBar = 0;
+        clearInterval(timerInterval);
+    }
+}
+*/
+/*
+$("#timer-start").click(function(){
+    socket.emit("timer", "start");
+});
+$("#timer-reset").click(function(){
+    socket.emit("timer", "reset");
+});
+*/
+/*
+socket.on("timer", function(msg){
+    if(msg === "start"){
+        timerInterval = setInterval(startTimer, 10);
+    } else if (msg === "reset"){
+        clearInterval(timerInterval);
+        timerBar = 0;
+        $("#countdown-bar").css("background-color", "rgb(0, 255, 0)");
+        $("#countdown-bar").css("border-top-width", timerBar+"vh");
+        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
+    }
+});
+*/
