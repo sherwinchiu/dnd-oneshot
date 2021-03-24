@@ -124,6 +124,10 @@ function updateD(player){
 }
 function updatePlayers(){
     for(var i = 0; i < players.length; i++){
+        if (player === players[i]){
+            playerX = playerXs[i];
+            playerY = playerYs[i];
+        }
         $("#"+players[i]).css("left", playerXs[i]);
         $("#"+players[i]).css("top", playerYs[i]);
     }
@@ -132,14 +136,6 @@ function updateMonsters(){
     for(var i = 0; i < monsterSelect.length; i++){
         $("#monster"+i).css("left", monsterX[i]);
         $("#monster"+i).css("top", monsterY[i]);
-    }
-}
-function localUpdate(){
-    for(var i = 0; i < players.length; i++){
-        if (player === players[i]){
-            playerX = playerXs[i];
-            playerY = playerYs[i];
-        }
     }
 }
 function resetOptions(){
@@ -169,6 +165,36 @@ function calcDistance(x1, x2, y1, y2){
     y2/=70.0;
     return Math.round(Math.sqrt(Math.pow((x2-x1), 2) + Math.pow((y2-y1), 2))*100/(zoom/100.0))/100.0;
 }
+function drawLine(p, x1, y1, x2, y2, d){
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.fillText(p+" "+d, (x1+x2)/2,(y1+y2-40)/2);
+    ctx.stroke();
+}
+function drawCircle(p, x, y, d){
+    ctx.beginPath();
+    ctx.arc(x, y, d, 0, 2*Math.PI);
+    ctx.fillText(p+" "+Math.round(distance*500)/100, x,y);
+    ctx.stroke();
+}
+function drawRect(p, x1, y1, x2, y2, d){
+    ctx.beginPath();
+    ctx.rect(x1, y1, x2, y2);
+    ctx.fillText(p+" "+d, (x1+x2-200),(y1+y2-70));
+    ctx.stroke();
+}
+function drawPing(p, x1, y1){
+    ctx.beginPath();
+    ctx.fillStyle = "red";
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x1-45, y1-45);
+    ctx.lineTo(x1+45,y1-45);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillText(p, x1-10, y1-55);
+    ctx.stroke();
+}
 function adjustObject(n, i){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     startPoint[0] = startPoint[0]/(zoom+n)*zoom;
@@ -177,28 +203,15 @@ function adjustObject(n, i){
     realPointY = realPointY/(zoom+n)*zoom;
     realLeftScroll = realLeftScroll/(zoom+n)*zoom;
     realTopScroll = realTopScroll/(zoom+n)*zoom;
-    ctx.beginPath();
     if(i===1){
-        ctx.moveTo(startPoint[0], startPoint[1]);
-        ctx.lineTo(realPointX+realLeftScroll, realPointY+realTopScroll);
-        ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
+        drawLine(player, startPoint[0], startPoint[1], realPointX+realLeftScroll, realPointY+realTopScroll, Math.round(distance*500)/100);
     } else if(i===2){
-        ctx.arc(startPoint[0], startPoint[1], (distance*70*zoom/100.0)/(zoom+n)*zoom,0, 2*Math.PI);
-        ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
+        drawCircle(player, startPoint[0], startPoint[1], distance*70*zoom/100.0);
     } else if(i===3){
-        ctx.rect(startPoint[0], startPoint[1], realPointX+realLeftScroll-startPoint[0], realPointY+realTopScroll-startPoint[1]);
-        ctx.fillText(player+" "+Math.round(distance*500)/100, (startPoint[0]+realPointX+realLeftScroll)/2, (startPoint[1]+realPointY+realTopScroll-20)/2);
+        drawRect(player, startPoint[0], startPoint[1], realPointX+realLeftScroll-startPoint[0], realPointY+realTopScroll-startPoint[1], Math.round(distance*500)/100);
     } else if(i===4){
-        ctx.fillStyle = "red";
-        ctx.moveTo(startPoint[0], startPoint[1]);
-        ctx.lineTo(startPoint[0]-45, startPoint[1]-45);
-        ctx.lineTo(startPoint[0]+45, startPoint[1]-45);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillText(player, startPoint[0]-10, startPoint[1]-55);
+        drawPing(player, startPoint[0], startPoint[1]);
     }
-    ctx.stroke();
-    
 }
 function adjustOutterObjects(n){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -210,58 +223,14 @@ function adjustOutterObjects(n){
             savedObjects[i][4]=savedObjects[i][4]/(zoom+n)*zoom;
         }
         if(playerSent[i] && savedObjects[i][7] === "line"){
-            ctx.beginPath();
-            ctx.moveTo(savedObjects[i][1], savedObjects[i][2]);
-            ctx.lineTo(savedObjects[i][3], savedObjects[i][4]);
-            ctx.stroke();
-            ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3])/2, (savedObjects[i][2]+savedObjects[i][4])/2);
+            drawLine(savedObjects[i][0], savedObjects[i][1], savedObjects[i][2], savedObjects[i][3], savedObjects[i][4], Math.round(savedObjects[i][5]*500)/100);
         } else if(playerSent[i] && savedObjects[i][7] === "circle"){
-            ctx.beginPath();
-            ctx.arc(savedObjects[i][1], savedObjects[i][2], savedObjects[i][5]*(70*zoom/100.0)/(zoom+n)*zoom, 0, 2*Math.PI);
-            ctx.stroke();
-            ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3]), (savedObjects[i][2]+savedObjects[i][4]));
+            drawCircle(savedObjects[i][0], savedObjects[i][1], savedObjects[i][2], savedObjects[i][5]*(70*zoom/100.0)/(zoom+n)*zoom);
         } else if(playerSent[i] && savedObjects[i][7] === "rect"){
-            ctx.beginPath();
-            ctx.rect(savedObjects[i][1],savedObjects[i][2],savedObjects[i][3],savedObjects[i][4]);
-            ctx.stroke();
-            ctx.fillText(savedObjects[i][0]+" "+Math.round(savedObjects[i][5]*500)/100, (savedObjects[i][1]+savedObjects[i][3]), (savedObjects[i][2]+savedObjects[i][4]));
+            drawRect(savedObjects[i][0], savedObjects[i][1], savedObjects[i][2], savedObjects[i][3], savedObjects[i][4], Math.round(savedObjects[i][5]*500)/100)
         } else if(playerSent[i] && savedObjects[i][7] === "ping"){
-            ctx.fillStyle = "red";
-            ctx.beginPath();
-            ctx.moveTo(savedObjects[i][3], savedObjects[i][4]);
-            ctx.lineTo(savedObjects[i][3]-45, savedObjects[i][4]);
-            ctx.lineTo(savedObjects[i][3]*+45, savedObjects[i][4]-45);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillText(savedObjects[i][0], savedObjects[i][3]-10, savedObjects[i][4]-55);
+            drawPing(playerSent[i][0], savedObjects[i][3], savedObjects[i][4])
         }
-    }
-}
-function drawFinalObject(n){
-    if(n===1){
-        pointValue = false;
-        ctx.lineTo(pointX+leftScroll, pointY+topScroll);
-        ctx.stroke();
-    } else if(n===2){
-        pointValue = false;
-        ctx.arc(startPoint[0], startPoint[1], distance*70*zoom/100.0,0, 2*Math.PI);
-        ctx.stroke();
-    } else if(n===3){
-        pointValue = false;
-        ctx.rect(startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll);
-        ctx.stroke();
-    } else if(n===4){
-        pointValue = false;
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.moveTo(pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop());
-        ctx.lineTo(pointX-45+$("#main-screen").scrollLeft(), pointY-45+$("#main-screen").scrollTop());
-        ctx.lineTo(pointX+45+$("#main-screen").scrollLeft(), pointY-45+$("#main-screen").scrollTop());
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillText(player, pointX-10+$("#main-screen").scrollLeft(), pointY-55+$("#main-screen").scrollTop());
     }
 }
 function resetObjects(){
@@ -305,6 +274,9 @@ if (player === players[0]){
     $("#pfp").append("<button id=change5>sasha</button>");
     $("#pfp").append("<button id=change6>enemy</button>");
 }
+ /**************************************************************
+  *                  Admin Onclick Listeners
+  **************************************************************/
 $("#spawn").click(function(){
     socket.emit("updateX", [0,1680, 1680, 1820, 1820, 1750]);
     socket.emit("updateY", [0,1960, 2030, 1960, 2030, 1890]);
@@ -355,29 +327,27 @@ $("#change6").click(function(){
 });
 // end admin functions
 drawGrid(30, 30);
- // Server Connection Stuff
+ /**************************************************************
+  *                  Client Side Listeners
+  **************************************************************/
 socket.emit("player", player);
 socket.on("hello", function(){
     socket.emit("hi", player);
 });
 socket.on("positionX", function(X){
     playerXs = X;
-    localUpdate();
     updatePlayers();
 });
 socket.on("positionY", function(Y){
     playerYs = Y;
-    localUpdate();
     updatePlayers();
 });
 socket.on("updateX", function(msg){
     playerXs = msg;
-    localUpdate();
     updatePlayers();
 });
 socket.on("updateY", function(msg){
     playerYs = msg;
-    localUpdate();
     updatePlayers();
 });
 socket.on("forceCam", function(msg){
@@ -432,7 +402,6 @@ socket.on('player-online', function(msg) {
 socket.on('player-offline', function(msg){
     $(".player-tab")[parseInt(msg)].style.backgroundColor = "red";
 });
-// Player location listeners
 socket.on("W", function(msg){
     updateW(msg);
 });
@@ -452,11 +421,7 @@ socket.on("line", function(msg){
         resetPlayerSent();
         savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "line");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.moveTo(msg[1]*(zoom/msg[6]), msg[2]*(zoom/msg[6]));
-        ctx.lineTo(msg[3]*(zoom/msg[6]), msg[4]*(zoom/msg[6]));
-        ctx.stroke();
-        ctx.fillText(msg[0] +" "+Math.round(msg[5]*500)/100, (msg[1]*(zoom/msg[6])+msg[3]*(zoom/msg[6]))/2, (msg[2]*(zoom/msg[6])+msg[4]*(zoom/msg[6]))/2-20);
+        drawLine(msg[0], msg[1]*(zoom/msg[6]), msg[2]*(zoom/msg[6]),msg[3]*(zoom/msg[6]), msg[4]*(zoom/msg[6]),Math.round(msg[5]*500)/100);
     }
 });
 socket.on("circle", function(msg){
@@ -466,10 +431,7 @@ socket.on("circle", function(msg){
         resetPlayerSent();
         savePlayer(msg[0], msg[1], msg[2], 0, 0, msg[3], msg[4], "circle");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.arc(msg[1]*(zoom/msg[4]), msg[2]*(zoom/msg[4]), msg[3]*70*msg[4]/100.0*(zoom/msg[4]), 0, 2*Math.PI);
-        ctx.stroke();
-        ctx.fillText(msg[0] +" "+Math.round(msg[3]*500)/100, msg[1]*(zoom/msg[4]), msg[2]*(zoom/msg[4])-20);
+        drawCircle(msg[0], msg[1]*(zoom/msg[4]), msg[2]*(zoom/msg[4]), msg[3]*70*msg[4]/100.0*(zoom/msg[4]));
     }
 });
 socket.on("rect", function(msg){
@@ -479,10 +441,7 @@ socket.on("rect", function(msg){
         resetPlayerSent();
         savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "rect");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.rect(msg[1]*(zoom/msg[6]),msg[2]*(zoom/msg[6]),msg[3]*(zoom/msg[6]),msg[4]*(zoom/msg[6]));
-        ctx.stroke();
-        ctx.fillText(msg[0] +" "+Math.round(msg[5]*500)/100, (msg[1]*(zoom/msg[6])+msg[3]*(zoom/msg[6]))-200, (msg[2]*(zoom/msg[6])+msg[4]*(zoom/msg[6]))-200);
+        drawRect(msg[0], msg[1]*(zoom/msg[6]), msg[2]*(zoom/msg[6]), msg[3]*(zoom/msg[6]), msg[4]*(zoom/msg[6]), Math.round(msg[5]*500)/100);
     }
 });
 socket.on("ping", function(msg){
@@ -492,15 +451,7 @@ socket.on("ping", function(msg){
         resetPlayerSent();
         savePlayer(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], "ping");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.moveTo(msg[3]*(zoom/msg[5]), msg[4]*(zoom/msg[5]));
-        ctx.lineTo(msg[3]*(zoom/msg[5])-45, msg[4]*(zoom/msg[5])-45);
-        ctx.lineTo(msg[3]*(zoom/msg[5])+45, msg[4]*(zoom/msg[5])-45);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillText(msg[0], msg[3]*(zoom/msg[5])-10, msg[4]*(zoom/msg[5])-55);
+        drawPing(msg[0], msg[3]*(zoom/msg[5]), msg[4]*(zoom/msg[5]));
     }
 });
 // Keylisteners for players
@@ -591,8 +542,7 @@ $("#zoom-out").click(function(){
     if(zoom<100){
         zoom =100;
         zoomOutMax = true;
-    } 
-    
+    }
     for(var i = 0; i < options.length; i++){
         if(drawnObjects[i] &&!zoomOutMax){
             adjustObject(15, i);
@@ -634,7 +584,6 @@ $("#grid-toggle").click(function(){
         $(".grid").css("display", "block");
     }
 })
-
 // Scroll Controls (will probably have to implement other controlls in here as well)
 $("#main-screen").mousedown(function(e) {
     e.preventDefault(); // mouse event
@@ -661,23 +610,20 @@ $("#main-screen").mousedown(function(e) {
             } else if(i===3){
                 socket.emit("rect", [player, startPoint[0], startPoint[1], pointX-startPoint[0]+leftScroll, pointY-startPoint[1]+topScroll, distance, zoom]);
             } 
-            drawFinalObject(i);
+            pointValue = false;
             drawnObjects[i] = true;
         } 
     }
     if(options[4]){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawFinalObject(4);
+        drawPing(player, pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop());
         drawnObjects[4] = true;
         socket.emit("ping", [player, startPoint[0], startPoint[1], pointX+$("#main-screen").scrollLeft(), pointY+$("#main-screen").scrollTop(), zoom, 0]);
-        startPoint[0] = pointX+$("#main-screen").scrollLeft();
-        startPoint[1] = pointY+$("#main-screen").scrollTop();
     }
 });
 $(document).mouseup(function() {
     clicking = false; // if mouse isn't clicked, not clicking
 });
-
 $("#main-screen").mousemove(function(e) {
     e.preventDefault(); // get mouse event
     leftScroll = $("#main-screen").scrollLeft();
@@ -688,26 +634,17 @@ $("#main-screen").mousemove(function(e) {
         $("#main-screen").scrollTop(topScroll + (pointY - e.clientY)); // scroll top for however much the difference between onclick and drag is 
     } else if(options[1] && pointValue){ 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.moveTo(startPoint[0], startPoint[1]);
-        ctx.lineTo(e.clientX+leftScroll, e.clientY+topScroll);
-        ctx.stroke();
+        drawLine(player, startPoint[0], startPoint[1], e.clientX+leftScroll, e.clientY+topScroll, Math.round(distance*500)/100);
         distance = calcDistance(0, e.clientX-startPoint[0]+leftScroll, 0, e.clientY-startPoint[1]+topScroll);
-        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX+leftScroll)/2, (startPoint[1]+e.clientY-20+topScroll)/2);
     } else if(options[2] && pointValue){
         distance = calcDistance(0, e.clientX-startPoint[0]+leftScroll, 0, e.clientY-startPoint[1]+topScroll);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.arc(startPoint[0], startPoint[1], distance*70*zoom/100.0,0, 2*Math.PI);
-        ctx.stroke();
-        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX+leftScroll)/2, (startPoint[1]+e.clientY-20+topScroll)/2);
+        drawCircle(player, startPoint[0], startPoint[1], distance*70*zoom/100.0);
+        // then after that you do Math.round((d/70*zoom/100.0)*500)/100
     } else if(options[3] && pointValue){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        ctx.rect(startPoint[0], startPoint[1], e.clientX-startPoint[0]+leftScroll, e.clientY-startPoint[1]+topScroll);
-        ctx.stroke();
+        drawRect(player, startPoint[0], startPoint[1], e.clientX-startPoint[0]+leftScroll, e.clientY-startPoint[1]+topScroll, Math.round(distance*500)/100)
         distance = calcDistance(0, e.clientX-startPoint[0]+leftScroll, 0, e.clientY-startPoint[1]+topScroll);
-        ctx.fillText(player +" "+Math.round(distance*500)/100, (startPoint[0]+e.clientX+leftScroll)/2, (startPoint[1]+e.clientY-20+topScroll)/2);
     } 
     if (options[0] || pointValue || clicking){
         pointX = e.clientX; //update point x for smoother transition
