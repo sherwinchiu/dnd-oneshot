@@ -19,7 +19,7 @@ var playerYs = [0, 0, 0, 0, 0, 0];
 var online = [false, false, false, false, false, false];
 var monsterX = [0, 0, 0];
 var monsterY = [0, 0, 0];
-
+var mapNum = 0;
 // Standard functions
 function moveW(player){
     for(var i = 0; i < players.length; i++){
@@ -66,6 +66,7 @@ io.sockets.on('connection', function(socket){
     io.emit("hello");
     io.emit("positionX", playerXs);
     io.emit("positionY", playerYs);
+    io.emit("map", mapNum);
     socket.on("hi", function(msg){
         for(var i = 0; i < players.length; i++){
             if(msg === players[i] || online[i]){
@@ -77,6 +78,10 @@ io.sockets.on('connection', function(socket){
             }
         }
     // User events for players 
+    });
+    socket.on("map", function(msg){
+        mapNum+= msg;
+        io.emit("map", mapNum);
     });
     socket.on("W", function(msg){
         moveW(msg);
@@ -101,13 +106,8 @@ io.sockets.on('connection', function(socket){
     socket.on("forceCam", function(msg){
         io.emit("forceCam", msg);
     });
-    /*
-    socket.on("timer", function(msg){
-        io.emit("timer", msg);
-    });
-    */
-    socket.on("spawn", function(msg){
-        io.emit("spawn", msg);
+    socket.on("spawn-monster", function(msg){
+        io.emit("spawn-monster", msg);
     });
     socket.on("monsterX", function(msg){
         monsterX = msg;

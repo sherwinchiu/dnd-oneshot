@@ -2,15 +2,12 @@
  * @fileoverview client side JS
  */
 // Scroll Variables
+const socket = io.connect();
 var clicking = false;
 $("#move").css("background-color", "grey");
 var zoom = 100;
-const mapLimits = [85, 85, 55]; 
 // move, line, circle, rect, cone, ping
 var optionNames = ["#move", "#line", "#circle", "#rect", "#ping"];
-var monsterSelect = [false, false, false];
-var monsterX = [1260, 1330, 1400];
-var monsterY = [910, 980, 1050];
 var options = [true, false, false, false, false];
             //move, line, circle, rect, cone, ping
 var drawnObjects = [false, false, false, false, false, false];
@@ -21,7 +18,6 @@ const timerHeight = 90.6;
 var gridToggle = false;
 const grid = 35;
 // Onclick listeners for the buttons
-const socket = io.connect();
 var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
 var playerSent = [false, false, false, false, false, false];
 // 2d array containing player names as the first element, then the elements of the object to draw
@@ -33,13 +29,33 @@ var savedObjects = [
     ["Lilah", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"],  //player 4 storage
     ["Sasha", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"]  //player 4 storage
 ];
-
+const playerStartX = [
+    [0,1680, 1680, 1820, 1820, 1750], // map 0
+    [0,1960, 2030, 1960, 2030, 1890], // map 1
+    [0,1960, 2030, 1960, 2030, 1890], // map 2
+    [0,1960, 2030, 1960, 2030, 1890], // map 3
+    [0,1960, 2030, 1960, 2030, 1890], // map 4
+    [0,1960, 2030, 1960, 2030, 1890]  // map 5
+];
+const playerStartY = [
+    [0,1960, 2030, 1960, 2030, 1890], // map 0
+    [0,1960, 2030, 1960, 2030, 1890], // map 1
+    [0,1960, 2030, 1960, 2030, 1890], // map 2
+    [0,1960, 2030, 1960, 2030, 1890], // map 3
+    [0,1960, 2030, 1960, 2030, 1890], // map 4
+    [0,1960, 2030, 1960, 2030, 1890], // map 5 
+];
+var monsterSelect = [false, false, false, false, false];
+var monsterX = [1260, 1330, 1400];
+var monsterY = [910, 980, 1050];
+const monsterStart = [3, 0, 6, 0, 2];
+const monsterPics = ["folder numbers"];
 var playerX = 0;
 var playerY = 0;
-var playerXs = [0, 0, 0, 0, 0, 0];
-var playerYs = [0, 0, 0, 0, 0, 0];
-var maxX = [2100, 2100, 3500];
-var maxY = 2100;
+var playerXs = [0,1680, 1680, 1820, 1820, 1750];
+var playerYs = [0,1960, 2030, 1960, 2030, 1890];
+var maxX = [2100, 2100, 4200, 4200, 2100, 3500];
+var maxY = [2100, 2100, 2100, 2100, 2100, 2450];
 var mapNum = 0;
 var player = prompt("Please enter your name, etc. (James, Nicolas, Glen, Lilah, Sasha)\nCase Sensitive so PLEASE put in your NAME WITH UPPERCASE");
 var pointValue = false;
@@ -246,11 +262,11 @@ function savePlayer(play, mouseX, mouseY, place1, place2, distance, z, type){
   *                  Admin Onclick Listeners
   *********************************************************************************************/
 if (player === players[0]){
-    $("#pfp").append("<button id=spawn>init</button>");
+    $("#pfp").append("<button id=map-back>back a map</button>");
+    $("#pfp").append("<button id=map-forw>forward a map</button>");
     $("#pfp").append("<button id=force>forcecam</button>");
-    $("#pfp").append("<button id=timer-start>start time</button>");
-    $("#pfp").append("<button id=timer-reset>reset time</button>");
     $("#pfp").append("<button id=spawn-monsters>spawn monsters</button>");
+    $("#pfp").append("<button id=debuff>toggle debuff</button>");
     $("#pfp").append("<button id=move1>move1</button>");
     $("#pfp").append("<button id=move2>move2</button>");
     $("#pfp").append("<button id=move3>move3</button>");
@@ -261,15 +277,27 @@ if (player === players[0]){
     $("#pfp").append("<button id=change5>sasha</button>");
     $("#pfp").append("<button id=change6>enemy</button>");
 }
-$("#spawn").click(function(){
-    socket.emit("updateX", [0,1680, 1680, 1820, 1820, 1750]);
-    socket.emit("updateY", [0,1960, 2030, 1960, 2030, 1890]);
+drawGrid(30, 30);
+$("#map-back").click(function(){
+    socket.emit("map", -1);
+});
+$("#map-forw").click(function(){
+    socket.emit("map", 1);
 });
 $("#force").click(function(){
     socket.emit("forceCam", [leftScroll, topScroll, zoom]);
 });
 $("#spawn-monsters").click(function(){
-    socket.emit("spawn", ["monster1","monster2","monster3"]);
+    for(var i = 0; i < playerStartX.length; i++){
+        socket.emit("spawn-monster", monsterStart[i]);
+    }
+});
+$("#debuff").click(function(){
+    for(var i = 0 ; i < monsterSelect[mapNum].length; i++){
+        if(monsterSelect[mapNum][i]){
+            // do something here
+        }
+    }
 });
 $("#move1").click(function(){
     monsterSelect = [true, false, false];
@@ -301,14 +329,26 @@ $("#change5").click(function(){
 $("#change6").click(function(){
     socket.emit("change", 6);
 });
-// end admin functions
-drawGrid(30, 30);
  /*******************************************************************
   *                  Client Side Listeners
   *******************************************************************/
 socket.emit("player", player);
 socket.on("hello", function(){
     socket.emit("hi", player);
+});
+socket.on("map", function(msg){
+    mapNum = msg;
+    if(mapNum < 0){
+        map = 0;
+    };
+    // all map changes insert here
+    // Changing player pos
+    socket.emit("updateX", playerStartX[mapNum]);
+    socket.emit("updateY", playerStartY[mapNum]);
+    // Changing grid out 
+    $(".grid").remove();
+    drawGrid(maxX[mapNum]/70, maxY[mapNum]/70);
+    $("#map").attr("src", "/maps/map"+mapNum+".png");
 });
 socket.on("positionX", function(X){
     playerXs = X;
@@ -335,11 +375,11 @@ socket.on("forceCam", function(msg){
     $(".player").css("zoom", zoom+"%");
     $(".monster").css("zoom", zoom+"%");
 });
-socket.on("spawn", function(msg){
-    for(var i = 0; i < msg.length; i++){
+socket.on("spawn-monster", function(msg){
+    for(var i = 0; i < msg; i++){
         $("#main-screen").append("<div class='monster' id='monster"+i+"' style='left:2070px; top:70px';><img src='/monsters/chuul.png'/></div>");
     }
-})
+});
 socket.on("monsterX", function(msg){
     monsterX = msg;
     updateMonsters();
@@ -458,7 +498,7 @@ document.addEventListener('keyup', function(e){
                     socket.emit("monsterY", monsterY);
                 }
             }
-        }else if(playerY >= maxY){
+        }else if(playerY >= maxY[mapNum]){
             playerY -=grid;
         } else{
             socket.emit("S", player);
@@ -551,7 +591,7 @@ $("#grid-toggle").click(function(){
         gridToggle = true;
         $(".grid").css("display", "block");
     }
-})
+});
 /************************************************************************
  *            Mouse Movement and Press Functions
  ************************************************************************/
@@ -624,40 +664,3 @@ $("#main-screen").mousemove(function(e) {
 $("#main-screen").mouseleave(function(e) {
     clicking = false; // if mouse isn't in screen, not clicking
 });
-/*
-function startTimer(){
-    var d = new Date();
-    if(d.getTime()-n  > 65 && timerBar <90.5){
-        timerBar+=0.1;
-        n = d.getTime();
-        $("#countdown-bar").css("border-top-width", timerBar+"vh");
-        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
-        $("#countdown-bar").css("background-color", "rgb("+Math.round(timerBar*10)+","+Math.round(255-timerBar*2.5)+", 0)");
-    }
-    if( timerBar> 90.5){
-        timerBar = 0;
-        clearInterval(timerInterval);
-    }
-}
-*/
-/*
-$("#timer-start").click(function(){
-    socket.emit("timer", "start");
-});
-$("#timer-reset").click(function(){
-    socket.emit("timer", "reset");
-});
-*/
-/*
-socket.on("timer", function(msg){
-    if(msg === "start"){
-        timerInterval = setInterval(startTimer, 10);
-    } else if (msg === "reset"){
-        clearInterval(timerInterval);
-        timerBar = 0;
-        $("#countdown-bar").css("background-color", "rgb(0, 255, 0)");
-        $("#countdown-bar").css("border-top-width", timerBar+"vh");
-        $("#countdown-bar").css("height", timerHeight-timerBar+"vh");
-    }
-});
-*/
