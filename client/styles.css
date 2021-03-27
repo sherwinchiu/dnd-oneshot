@@ -30,7 +30,7 @@ html, body {
     display:block;
     position:absolute;
     z-index: 54;
-    zoom: 100%
+    zoom: 100%;
 }
 .option{
     display: block;

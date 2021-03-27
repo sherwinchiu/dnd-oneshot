@@ -31,25 +31,43 @@ var savedObjects = [
 ];
 const playerStartX = [
     [0,1680, 1680, 1820, 1820, 1750], // map 0
-    [0,1960, 2030, 1960, 2030, 1890], // map 1
-    [0,1960, 2030, 1960, 2030, 1890], // map 2
+    [0, 420, 280, 420, 245, 280], // map 1
+    [0,0, 70, 140, 0, 70], // map 2
     [0,1960, 2030, 1960, 2030, 1890], // map 3
-    [0,1960, 2030, 1960, 2030, 1890], // map 4
-    [0,1960, 2030, 1960, 2030, 1890]  // map 5
+    [0,490, 560, 490, 560, 630], // map 4
+    [0,3080, 3150, 3220, 3290, 3360]  // map 5
 ];
 const playerStartY = [
     [0,1960, 2030, 1960, 2030, 1890], // map 0
-    [0,1960, 2030, 1960, 2030, 1890], // map 1
-    [0,1960, 2030, 1960, 2030, 1890], // map 2
-    [0,1960, 2030, 1960, 2030, 1890], // map 3
-    [0,1960, 2030, 1960, 2030, 1890], // map 4
-    [0,1960, 2030, 1960, 2030, 1890], // map 5 
+    [0,210, 210, 350, 280, 350], // map 1
+    [0,980, 980, 1050, 1120, 1120], // map 2
+    [0,980, 980, 1050, 1120, 1120], // map 3
+    [0,840, 840, 930, 930, 930], // map 4
+    [0,1120, 1120, 1120, 1120, 1120], // map 5 
 ];
-var monsterSelect = [false, false, false, false, false];
-var monsterX = [1260, 1330, 1400];
-var monsterY = [910, 980, 1050];
-const monsterStart = [3, 0, 6, 0, 2];
-const monsterPics = ["folder numbers"];
+var monsterSelect = [false, false, false];
+var monsterX = [[1260, 1330, 1400],
+                [2030],
+                [2030, 2030, 2030],
+                [2030],
+                [210, 210]
+];
+var monsterY = [[910, 980, 1050],
+                [420],
+                [420, 420, 420],
+                [420],
+                [420, 420]
+
+];
+const monsterStart = [3, 0, 3, 0, 2];
+const monsterPics = [
+    ["/monsters/chuul.png", "/monsters/chuul.png", "/monsters/chuul.png"],
+    ["/monsters/kid.png"], // need kid token 
+    ["/monsters/assassin.png", "mmonsters/fire-elemental.png", "monsters/fire-elementalf.png"], // might need 
+    ["/monsters/fake-guy"], // need fake guy token
+    ["/monsters/fake-guy", "/monsters/dragon.png"] // need fake-guy token, and monster token 
+
+];
 var playerX = 0;
 var playerY = 0;
 var playerXs = [0,1680, 1680, 1820, 1820, 1750];
@@ -70,6 +88,7 @@ var timerInterval = 0;
 
 var zoomOutMax = false;
 var zoomInMax = false;
+var zoomValueMax = [100, 100, 50, 50, 100, 50];
 var leftScroll = 0;
 var topScroll = 0;
 
@@ -138,9 +157,9 @@ function updatePlayers(){
     }
 }
 function updateMonsters(){
-    for(var i = 0; i < monsterSelect.length; i++){
-        $("#monster"+i).css("left", monsterX[i]);
-        $("#monster"+i).css("top", monsterY[i]);
+    for(var i = 0; i < monsterSelect[mapNum].length; i++){
+        $("#monster"+i).css("left", monsterX[mapNum][i]);
+        $("#monster"+i).css("top", monsterY[mapNum][i]);
     }
 }
 function resetOptions(){
@@ -267,6 +286,7 @@ if (player === players[0]){
     $("#pfp").append("<button id=force>forcecam</button>");
     $("#pfp").append("<button id=spawn-monsters>spawn monsters</button>");
     $("#pfp").append("<button id=debuff>toggle debuff</button>");
+    $("#pfp").append("<button id=die>kill the monster</button>");
     $("#pfp").append("<button id=move1>move1</button>");
     $("#pfp").append("<button id=move2>move2</button>");
     $("#pfp").append("<button id=move3>move3</button>");
@@ -288,13 +308,18 @@ $("#force").click(function(){
     socket.emit("forceCam", [leftScroll, topScroll, zoom]);
 });
 $("#spawn-monsters").click(function(){
-    for(var i = 0; i < playerStartX.length; i++){
-        socket.emit("spawn-monster", monsterStart[i]);
-    }
+    socket.emit("spawn-monster", monsterStart[mapNum]);
 });
 $("#debuff").click(function(){
-    for(var i = 0 ; i < monsterSelect[mapNum].length; i++){
-        if(monsterSelect[mapNum][i]){
+    for(var i = 0 ; i < monsterSelect.length; i++){
+        if(monsterSelect[i]){
+            // do something here
+        }
+    }
+});
+$("#die").click(function(){
+    for(var i = 0 ; i < monsterSelect.length; i++){
+        if(monsterSelect[i]){
             // do something here
         }
     }
@@ -333,6 +358,7 @@ $("#change6").click(function(){
   *                  Client Side Listeners
   *******************************************************************/
 socket.emit("player", player);
+socket.emit("map", 0);
 socket.on("hello", function(){
     socket.emit("hi", player);
 });
@@ -342,6 +368,9 @@ socket.on("map", function(msg){
         map = 0;
     };
     // all map changes insert here
+    resetObjects();
+    resetPlayerSent();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     // Changing player pos
     socket.emit("updateX", playerStartX[mapNum]);
     socket.emit("updateY", playerStartY[mapNum]);
@@ -376,9 +405,12 @@ socket.on("forceCam", function(msg){
     $(".monster").css("zoom", zoom+"%");
 });
 socket.on("spawn-monster", function(msg){
-    for(var i = 0; i < msg; i++){
-        $("#main-screen").append("<div class='monster' id='monster"+i+"' style='left:2070px; top:70px';><img src='/monsters/chuul.png'/></div>");
+    $(".monster").remove();
+    for(var i = 0; i < monsterPics[mapNum].length; i++){ // what monsters are we putting in there boy 
+        console.log(monsterPics[mapNum][i])
+        $("#main-screen").append("<div class='monster' id='monster"+i+"><img src="+monsterPics[mapNum][i]+"/></div>");
     }
+    updateMonsters();
 });
 socket.on("monsterX", function(msg){
     monsterX = msg;
@@ -547,8 +579,8 @@ $("#zoom-in").click(function(){
 $("#zoom-out").click(function(){
     zoom-=15;
     zoomInMax = false;
-    if(zoom<100){
-        zoom =100;
+    if(zoom< zoomValueMax[mapNum]){
+        zoom =zoomValueMax[mapNum];
         zoomOutMax = true;
     }
     for(var i = 0; i < options.length; i++){
