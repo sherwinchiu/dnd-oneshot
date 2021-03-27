@@ -18,7 +18,7 @@ const timerHeight = 90.6;
 var gridToggle = false;
 const grid = 35;
 // Onclick listeners for the buttons
-var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
+var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha", "echo", "rein"];
 var playerSent = [false, false, false, false, false, false];
 // 2d array containing player names as the first element, then the elements of the object to draw
 var savedObjects = [
@@ -30,48 +30,53 @@ var savedObjects = [
     ["Sasha", "mouse1", "mouse2", "placehold1", "placehold2", "distance", "zoom", "type"]  //player 4 storage
 ];
 const playerStartX = [
-    [0,1680, 1680, 1820, 1820, 1750], // map 0
-    [0, 420, 280, 420, 245, 280], // map 1
-    [0,0, 70, 140, 0, 70], // map 2
-    [0,1960, 2030, 1960, 2030, 1890], // map 3
-    [0,490, 560, 490, 560, 630], // map 4
-    [0,3080, 3150, 3220, 3290, 3360]  // map 5
+    [0,1680, 1680, 1820, 1820, 1750, 1680, 1680], // map 0
+    [0, 420, 280, 420, 245, 280, 280, 280], // map 1
+    [0,0, 70, 140, 0, 70, 70, 70], // map 2
+    [0,1960, 2030, 1960, 2030, 1890, 2030, 2030], // map 3
+    [0,490, 560, 490, 560, 630, 560, 560], // map 4
+    [0,3080, 3150, 3220, 3290, 3360, 3150, 3150]  // map 5
 ];
 const playerStartY = [
-    [0,1960, 2030, 1960, 2030, 1890], // map 0
-    [0,210, 210, 350, 280, 350], // map 1
-    [0,980, 980, 1050, 1120, 1120], // map 2
-    [0,980, 980, 1050, 1120, 1120], // map 3
-    [0,840, 840, 930, 930, 930], // map 4
-    [0,1120, 1120, 1120, 1120, 1120], // map 5 
+    [0,1960, 2030, 1960, 2030, 1890, 1960, 1960], // map 0
+    [0,210, 210, 350, 280, 350, 210, 210], // map 1
+    [0,980, 980, 1050, 1120, 1120, 980, 980], // map 2
+    [0,980, 980, 1050, 1120, 1120,980, 980], // map 3
+    [0,840, 840, 930, 930, 930, 840, 840], // map 4
+    [0,1120, 1120, 1120, 1120, 1120, 1120, 1120], // map 5 
 ];
-var monsterSelect = [false, false, false];
+var monsterSelect = [false, false, false, false, false, false];
+var monsterDebuff = [false, false, false, false, false, false];
 var monsterX = [[1260, 1330, 1400],
                 [2030],
+                [210, 2905, 1960, 2310],
                 [2030, 2030, 2030],
-                [2030],
-                [210, 210]
+                [490],
+                [3150, 770]
 ];
 var monsterY = [[910, 980, 1050],
-                [420],
+                [945],
+                [980, 1015, 280, 1470],
                 [420, 420, 420],
-                [420],
-                [420, 420]
+                [1070],
+                [1170, 1030]
 
 ];
-const monsterStart = [3, 0, 3, 0, 2];
+const monsterStart = [3, 0, 3,0, 1, 2];
 const monsterPics = [
     ["/monsters/chuul.png", "/monsters/chuul.png", "/monsters/chuul.png"],
     ["/monsters/kid.png"], // need kid token 
-    ["/monsters/assassin.png", "mmonsters/fire-elemental.png", "monsters/fire-elementalf.png"], // might need 
-    ["/monsters/fake-guy"], // need fake guy token
-    ["/monsters/fake-guy", "/monsters/dragon.png"] // need fake-guy token, and monster token 
+    ["/monsters/kid.png","/monsters/assassin.png", "monsters/fire-elemental.png", "monsters/fire-elementalf.png"], // might need 
+    [],
+    ["/monsters/fake-guy.png"], // need fake guy token
+    ["/monsters/fake-guy.png", "/monsters/dragon.png"] // need fake-guy token, and monster token 
 
 ];
+var toggle = [false, false];
 var playerX = 0;
 var playerY = 0;
-var playerXs = [0,1680, 1680, 1820, 1820, 1750];
-var playerYs = [0,1960, 2030, 1960, 2030, 1890];
+var playerXs = [0,1680, 1680, 1820, 1820, 1750, 0, 0];
+var playerYs = [0,1960, 2030, 1960, 2030, 1890, 0, 0];
 var maxX = [2100, 2100, 4200, 4200, 2100, 3500];
 var maxY = [2100, 2100, 2100, 2100, 2100, 2450];
 var mapNum = 0;
@@ -157,7 +162,7 @@ function updatePlayers(){
     }
 }
 function updateMonsters(){
-    for(var i = 0; i < monsterSelect[mapNum].length; i++){
+    for(var i = 0; i < monsterSelect.length; i++){
         $("#monster"+i).css("left", monsterX[mapNum][i]);
         $("#monster"+i).css("top", monsterY[mapNum][i]);
     }
@@ -290,12 +295,17 @@ if (player === players[0]){
     $("#pfp").append("<button id=move1>move1</button>");
     $("#pfp").append("<button id=move2>move2</button>");
     $("#pfp").append("<button id=move3>move3</button>");
+    $("#pfp").append("<button id=move4>move4</button>");
+    $("#pfp").append("<button id=move5>move5</button>");
+    $("#pfp").append("<button id=move6>move6</button>");
     $("#pfp").append("<button id=change1>james</button>");
     $("#pfp").append("<button id=change2>glen</button>");
     $("#pfp").append("<button id=change3>nicolas</button>");
     $("#pfp").append("<button id=change4>lilah</button>");
     $("#pfp").append("<button id=change5>sasha</button>");
     $("#pfp").append("<button id=change6>enemy</button>");
+    $("#pfp").append("<button id=show-echo>echo</button>");
+    $("#pfp").append("<button id=show-rein>rein</button>");
 }
 drawGrid(30, 30);
 $("#map-back").click(function(){
@@ -313,25 +323,34 @@ $("#spawn-monsters").click(function(){
 $("#debuff").click(function(){
     for(var i = 0 ; i < monsterSelect.length; i++){
         if(monsterSelect[i]){
-            // do something here
-        }
-    }
-});
-$("#die").click(function(){
-    for(var i = 0 ; i < monsterSelect.length; i++){
-        if(monsterSelect[i]){
-            // do something here
+            socket.emit("debuff", i);
         }
     }
 });
 $("#move1").click(function(){
-    monsterSelect = [true, false, false];
+    monsterSelect = [true, false, false, false, false, false];
 });
 $("#move2").click(function(){
-    monsterSelect = [false, true, false];
+    monsterSelect = [false, true, false, false, false, false];
 });
 $("#move3").click(function(){
-    monsterSelect = [false, false, true];
+    monsterSelect = [false, false, true, false, false, false];
+});
+$("#move4").click(function(){
+    monsterSelect = [false, false, false, true, false, false];
+});
+$("#move5").click(function(){
+    monsterSelect = [false, false, false, false, true, false];
+});
+$("#move6").click(function(){
+    monsterSelect = [false, false, false, false, false, true];
+});
+$("#show-echo").click(function(){
+    
+    socket.emit("show", 0);
+})
+$("#show-rein").click(function(){
+    socket.emit("show", 1);
 });
 $("#change1").click(function(){
     socket.emit("change", 0);
@@ -376,6 +395,7 @@ socket.on("map", function(msg){
     socket.emit("updateY", playerStartY[mapNum]);
     // Changing grid out 
     $(".grid").remove();
+    $(".monster").remove();
     drawGrid(maxX[mapNum]/70, maxY[mapNum]/70);
     $("#map").attr("src", "/maps/map"+mapNum+".png");
 });
@@ -395,6 +415,23 @@ socket.on("updateY", function(msg){
     playerYs = msg;
     updatePlayers();
 });
+socket.on("show", function(msg){
+    if(toggle[msg]){
+        if(msg === 0){
+            $("#echo").css("display", "none");
+        } else{
+            $("#rein").css("display", "none");
+        }
+        toggle[msg] = false;
+    } else{
+        if(msg === 0){
+            $("#echo").css("display", "block");
+        } else{
+            $("#rein").css("display", "block");
+        }
+        toggle[msg] = true;
+    }
+});
 socket.on("forceCam", function(msg){
     zoom = msg[2];
     $("#main-screen").scrollLeft(msg[0]); 
@@ -407,18 +444,26 @@ socket.on("forceCam", function(msg){
 socket.on("spawn-monster", function(msg){
     $(".monster").remove();
     for(var i = 0; i < monsterPics[mapNum].length; i++){ // what monsters are we putting in there boy 
-        console.log(monsterPics[mapNum][i])
-        $("#main-screen").append("<div class='monster' id='monster"+i+"><img src="+monsterPics[mapNum][i]+"/></div>");
+        $("#main-screen").append("<div class='monster' id='monster"+i+"' style='left:70px; top:70px;'><img src='"+monsterPics[mapNum][i]+"'></div>");
     }
     updateMonsters();
 });
 socket.on("monsterX", function(msg){
-    monsterX = msg;
+    monsterX[mapNum] = msg;
     updateMonsters();
 });
 socket.on("monsterY", function(msg){
-    monsterY = msg;
+    monsterY[mapNum] = msg;
     updateMonsters();
+});
+socket.on("debuff", function(msg){
+    if(monsterDebuff[msg]){
+        $("#monster"+[msg]).css("border-bottom", "none");
+        monsterDebuff[msg] = false;
+    } else{
+        $("#monster"+[msg]).css("border-bottom", "red solid");
+        monsterDebuff[msg] = true;
+    }
 });
 socket.on("change", function(msg){
     $(".pfp-display").remove();
@@ -498,8 +543,8 @@ document.addEventListener('keyup', function(e){
         if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
-                    monsterY[i]-=grid;
-                    socket.emit("monsterY", monsterY);
+                    monsterY[mapNum][i]-=grid;
+                    socket.emit("monsterY", monsterY[mapNum]);
                 }
             }
         } else if(playerY < 0){
@@ -512,8 +557,8 @@ document.addEventListener('keyup', function(e){
         if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
-                    monsterX[i]-=grid;
-                    socket.emit("monsterX", monsterX);
+                    monsterX[mapNum][i]-=grid;
+                    socket.emit("monsterX", monsterX[mapNum]);
                 }
             }
         } else if(playerX < 0){
@@ -526,8 +571,8 @@ document.addEventListener('keyup', function(e){
         if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
-                    monsterY[i]+=grid;
-                    socket.emit("monsterY", monsterY);
+                    monsterY[mapNum][i]+=grid;
+                    socket.emit("monsterY", monsterY[mapNum]);
                 }
             }
         }else if(playerY >= maxY[mapNum]){
@@ -540,8 +585,8 @@ document.addEventListener('keyup', function(e){
         if(player === players[0]){
             for(var i = 0; i < monsterSelect.length; i++){
                 if(monsterSelect[i]){
-                    monsterX[i]+=grid;
-                    socket.emit("monsterX", monsterX);
+                    monsterX[mapNum][i]+=grid;
+                    socket.emit("monsterX", monsterX[mapNum]);
                 }
             }
         }else if(playerX >= maxX[mapNum]){
@@ -550,6 +595,7 @@ document.addEventListener('keyup', function(e){
             socket.emit("D", player);
         }
     }
+    
 });
 /************************************************************************
  *                 Mouse Options Click Functions

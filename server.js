@@ -13,12 +13,25 @@ const http = require("http");
 const server = http.createServer(app);
 const io = require("socket.io")(server);
 const grid = 35;
-var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha"];
-var playerXs = [0, 0, 0, 0, 0, 0];
-var playerYs = [0, 0, 0, 0, 0, 0];
+var players = ["Sherwin", "James", "Glen", "Nicolas", "Lilah", "Sasha", "echo", "rein"];
+var playerXs = [0, 0, 0, 0, 0, 0, 0, 0];
+var playerYs = [0, 0, 0, 0, 0, 0, 0, 0];
 var online = [false, false, false, false, false, false];
-var monsterX = [0, 0, 0];
-var monsterY = [0, 0, 0];
+var monsterX = [[1260, 1330, 1400],
+                [2030],
+                [210, 2030, 2030, 2030],
+                [2030, 2030, 2030],
+                [2030],
+                [210, 210]
+];
+var monsterY = [[910, 980, 1050],
+                [420],
+                [980, 420, 420, 420],
+                [420, 420, 420],
+                [420],
+                [420, 420]
+
+];
 var mapNum = 0;
 // Standard functions
 function moveW(player){
@@ -55,6 +68,7 @@ function moveD(player){
 }
 server.listen(port);
 app.use(express.static(__dirname+"/client"));
+app.use(express.static(__dirname+"/monsters"));
 app.use(express.static(__dirname));
 app.get('/', function(req, res){
     res.sendFile(__dirname+"/client/index.html");
@@ -67,6 +81,8 @@ io.sockets.on('connection', function(socket){
     io.emit("positionX", playerXs);
     io.emit("positionY", playerYs);
     io.emit("map", mapNum);
+    io.emit("monsterX", monsterX[mapNum]);
+    io.emit("monsterY", monsterY[mapNum]);
     socket.on("hi", function(msg){
         for(var i = 0; i < players.length; i++){
             if(msg === players[i] || online[i]){
@@ -109,13 +125,16 @@ io.sockets.on('connection', function(socket){
     socket.on("spawn-monster", function(msg){
         io.emit("spawn-monster", msg);
     });
+    socket.on("show", function(msg){
+        io.emit("show", msg);
+    })
     socket.on("monsterX", function(msg){
-        monsterX = msg;
-        io.emit("monsterX", monsterX);
+        monsterX[mapNum] = msg;
+        io.emit("monsterX", monsterX[mapNum]);
     });
     socket.on("monsterY", function(msg){
-        monsterY = msg;
-        io.emit("monsterY", monsterY);
+        monsterY[mapNum] = msg;
+        io.emit("monsterY", monsterY[mapNum]);
     });
     socket.on("change", function(msg){
         for(var i = 0; i < players.length; i++){
@@ -127,6 +146,10 @@ io.sockets.on('connection', function(socket){
             io.emit("change", "monster");
         }
     });
+    socket.on("debuff", function(msg){
+        io.emit("debuff", msg);
+    });
+
     // Events for player lines
     socket.on("line", function(msg){ // [name, point1, point2, point3, point4, zoom]
         io.emit("line", msg);
